@@ -1,0 +1,249 @@
+/* -------------------------------
+   🎨 Estilos base - Paladar de Vinho
+   🌟 Versão Andy Warhol (layout flexível para rolagem)
+   ------------------------------- */
+
+/* RESET + tipografia */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Corpo da aplicação */
+body {
+  background-color: #fafafa;
+  color: #333;
+  line-height: 1.6;
+  /* ✅ CORREÇÃO: Removemos 'overflow: hidden' para permitir rolagem no nível da página se necessário */
+}
+
+/* =============================== */
+/*   CONTAINER PADRÃO DAS TELAS    */
+/* =============================== */
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* ✅ Ajustamos a altura para garantir que o conteúdo possa rolar se for maior que a tela */
+  min-height: 100vh;
+  width: 100%;
+  padding: 24px;
+}
+
+/* =============================== */
+/*          TEXTOS BÁSICOS         */
+/* =============================== */
+
+h1, h2, h3 {
+  color: #4a148c;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+p {
+  max-width: 480px;
+  text-align: center;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+/* =============================== */
+/*      CAMPOS DE FORMULÁRIO       */
+/* =============================== */
+
+/* 💡 CORREÇÃO CRÍTICA: Este é o estilo para formulários pequenos (Login) */
+.small-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px; /* Limita a largura para formulários como o de Login */
+}
+
+/* Estilo padrão para todos os formulários. O formulário grande (WineForm) usará este. */
+form {
+  width: 100%; /* Garante que o formulário grande possa se expandir */
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+input, select {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+  border-color: #7b1fa2;
+  outline: none;
+  /* Não precisamos mais forçar z-index aqui, o appendTo resolve no React */
+}
+
+/* =============================== */
+/*             BOTÕES              */
+/* =============================== */
+
+button {
+  padding: 10px 16px;
+  background-color: #7b1fa2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+button:hover {
+  background-color: #6a1b9a;
+  transform: scale(1.05);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =============================== */
+/*            FEEDBACK             */
+/* =============================== */
+
+.error {
+  color: crimson;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.success {
+  color: seagreen;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* =============================== */
+/*   ÁREA ADMINISTRATIVA (CARD)    */
+/* =============================== */
+
+/* ✅ NOVO ESTILO: Garante que o container do formulário do admin use 100% da largura,
+   mas com margens automáticas para centralizar em telas grandes. */
+.admin-container {
+  max-width: 1200px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 24px 0; /* Padding vertical para não grudar nas bordas da tela */
+}
+
+/* 💡 CORREÇÃO Z-INDEX: Garante que os painéis de dropdown do PrimeReact fiquem por cima de tudo */
+.p-dropdown-panel {
+  z-index: 9999 !important;
+}
+
+/* =============================== */
+/*          ESTILO DA TABELA       */
+/* =============================== */
+
+.p-datatable {
+  width: 100%;
+  border-collapse: collapse !important;
+}
+
+.p-datatable thead th {
+  background-color: #f4f4f4 !important;
+  color: #4a2c2a !important;
+  font-weight: 600 !important;
+  text-align: left;
+  border-bottom: 2px solid #e0e0e0 !important;
+}
+
+.p-datatable tbody tr {
+  background-color: #fff !important;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.p-datatable tbody tr:hover {
+  background-color: #faf0e6 !important;
+  transform: scale(1.01);
+}
+
+.p-datatable .p-button {
+  border-radius: 6px !important;
+  font-size: 0.85rem !important;
+  padding: 6px 10px !important;
+}
+
+.p-datatable-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden !important;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  scrollbar-width: thin;
+  scrollbar-color: #c6a1cc #f5f2f7;
+}
+
+.p-datatable-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.p-datatable-wrapper::-webkit-scrollbar-thumb {
+  background-color: #c6a1cc;
+  border-radius: 8px;
+}
+
+.p-datatable thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f4f4f4 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.p-button-warning {
+  background-color: #d4a017 !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.p-button-warning:hover {
+  background-color: #b8860b !important;
+}
+
+.p-button-danger {
+  background-color: #7b2d26 !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.p-button-danger:hover {
+  background-color: #9b1c1c !important;
+}
+
+.p-datatable tbody tr {
+  height: 2.4rem !important;
+  vertical-align: middle !important;
+}
+
+.p-paginator-bottom {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.p-datatable table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}

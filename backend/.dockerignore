@@ -1,0 +1,27 @@
+# Arquivos de cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env (não precisa ir pra imagem)
+venv/
+.env/
+
+# Arquivos locais / banco SQLite
+*.db
+*.sqlite3
+
+# Configurações de IDEs
+.vscode/
+.idea/
+
+# Logs e backups
+*.log
+*.bak
+*.tmp
+
+# Pastas de build
+node_modules/
+dist/
+build/

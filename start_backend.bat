@@ -1,0 +1,6 @@
+@echo off
+echo 🧹 Limpando cache antigo (__pycache__)...
+powershell -Command "Get-ChildItem -Recurse -Include __pycache__ | Remove-Item -Recurse -Force"
+
+echo 🚀 Iniciando servidor FastAPI...
+uvicorn backend.app:app --reload

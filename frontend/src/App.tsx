@@ -110,7 +110,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Presentation />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/questionario" element={<Questionary />} />
+          <Route path="/questionary" element={<Questionary />} />
 
           {/* Resultados (rota protegida para cliente logado) */}
           <Route

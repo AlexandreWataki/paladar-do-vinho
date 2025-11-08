@@ -247,3 +247,90 @@ button:disabled {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* =============================== */
+/*   PERFIL DE PALADAR (QUESTIONARY)   */
+/* =============================== */
+
+.wine-profile-container {
+  max-width: 600px;
+  margin: auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.wine-profile-container h2 {
+  text-align: center;
+  color: #5e35b1;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+select,
+input[type="range"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.slider-group {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  margin-bottom: 20px;
+}
+
+.slider-value {
+  text-align: center;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 6px;
+  color: #5e35b1;
+}
+
+.context-text {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 5px;
+  min-height: 20px;
+}
+
+.help-text {
+  font-style: italic;
+  color: #888;
+  margin-top: 5px;
+  font-size: 0.85em;
+}
+
+button.recommend-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #5e35b1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+button.recommend-btn:hover {
+  background-color: #4527a0;
+}

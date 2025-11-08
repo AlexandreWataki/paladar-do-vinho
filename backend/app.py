@@ -14,26 +14,28 @@ from backend.routes.admin_routes import router as admin_router
 # -------------------------------
 # 1️⃣ CONFIGURAÇÃO INICIAL
 # -------------------------------
+print("🚀 Inicializando FastAPI com suporte CORS ativo...")
+
 # Cria as tabelas no banco de dados (caso não existam)
 Base.metadata.create_all(bind=engine)
 
-# ✅ Instancia o aplicativo FastAPI com debug ativado
+# Instancia o aplicativo FastAPI com debug ativado
 app = FastAPI(
     title="Paladar de Vinho API",
-    debug=True  # Exibe erros detalhados no navegador e terminal
+    debug=True
 )
 
 # -------------------------------
 # 2️⃣ CONFIGURAÇÃO DO CORS
 # -------------------------------
 origins = [
-    "http://localhost",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,       # ⚠️ Não use "*" se allow_credentials=True
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,17 +44,12 @@ app.add_middleware(
 # -------------------------------
 # 3️⃣ REGISTRO DAS ROTAS
 # -------------------------------
-# Autenticação de usuários e admins
 app.include_router(auth_routes.router)             # /auth/...
-
-# Rotas do administrador (CRUD de vinhos)
 app.include_router(admin_router)                   # /admin/vinhos/...
-
-# Recomendação de vinhos para usuários
 app.include_router(recommendation_routes.router)   # /recommendations/...
 
 # -------------------------------
-# 4️⃣ ENDPOINT RAIZ (teste)
+# 4️⃣ ENDPOINT RAIZ (teste rápido)
 # -------------------------------
 @app.get("/")
 def root():

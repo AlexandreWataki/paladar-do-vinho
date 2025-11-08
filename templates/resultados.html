@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suas Recomendações de Vinho</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0ffef; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        h2 { text-align: center; color: #5e35b1; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #777; margin-bottom: 30px; font-size: 1.1em; }
+        .wine-card { 
+            border: 2px solid #5e35b1; 
+            border-left: 10px solid #5e35b1; /* Destaque lateral */
+            padding: 20px; 
+            margin-bottom: 25px; 
+            border-radius: 6px; 
+            background-color: #ffffff;
+            position: relative;
+        }
+        .wine-card h3 { color: #5e35b1; margin-top: 0; }
+        .score-badge { 
+            position: absolute; 
+            top: 15px; 
+            right: 20px; 
+            background-color: #d1c4e9; 
+            color: #5e35b1; 
+            padding: 5px 10px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+        }
+        .details p { margin: 5px 0; font-size: 0.95em; }
+        .match-text { margin-top: 10px; font-style: italic; color: #388e3c; font-weight: bold; }
+        .back-button { 
+            display: block; 
+            width: 50%; 
+            margin: 30px auto 0; 
+            padding: 12px; 
+            text-align: center; 
+            background-color: #81c784; 
+            color: white; 
+            border-radius: 4px; 
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>✨ Suas Recomendações Perfeitas ✨</h2>
+        <p class="subtitle">Encontramos os vinhos que mais combinam com o seu perfil de paladar.</p>
+        
+        {% if wines %}
+            {% for wine in wines %}
+                <div class="wine-card">
+                    <span class="score-badge">Score: {{ wine.score }}/11</span>
+                    
+                    <h3>{{ loop.index }}. {{ wine.name }} {{ wine.vintage }}</h3>
+                    
+                    <div class="details">
+                        <p><strong>Uva Principal:</strong> {{ wine.grape }}</p>
+                        <p><strong>Região/País:</strong> {{ wine.region }}, {{ wine.country }}</p>
+                        <p><strong>Preço Médio:</strong> R$ {{ "%.2f"|format(wine.price) }}</p>
+                    </div>
+
+                    <p class="match-text">
+                        Este vinho atingiu alta pontuação por ser o {{ wine.style }} ideal 
+                        para sua ocasião {{ wine.user_occasion }} e harmonizar com {{ wine.user_pairing }}.
+                    </p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: red; font-size: 1.2em;">
+                😔 Ops! Não encontramos nenhum vinho que corresponda a todos os seus critérios. Tente novamente com filtros mais amplos.
+            </p>
+        {% endif %}
+        <a href="/questionnaire" class="back-button">Refazer Questionário</a>
+    </div>
+</body>
+</html>

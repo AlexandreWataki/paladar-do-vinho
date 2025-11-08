@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monte seu Perfil de Paladar</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f0f0f0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        color: #5e35b1;
+        margin-bottom: 25px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+      }
+      select,
+      input[type="range"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .slider-group {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+      }
+      .slider-value {
+        text-align: center;
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-top: 5px;
+        color: #5e35b1;
+      }
+      .context-text {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 5px;
+        min-height: 20px;
+      }
+      .help-text {
+        font-style: italic;
+        color: #888;
+        margin-top: 5px;
+        font-size: 0.85em;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #5e35b1;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1.1em;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #4527a0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Monte seu perfil de paladar 🍇</h2>
+      <form id="wineForm" method="POST" action="/recommend">
+        <div class="form-group">
+          <label for="wine_type">Qual tipo de vinho você prefere?</label>
+          <select id="wine_type" name="wine_type" required>
+            <option value="">Selecione</option>
+            <option value="tinto">Tinto</option>
+            <option value="branco">Branco</option>
+            <option value="rose">Rosé</option>
+            <option value="espumante">Espumante</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="occasion">Para qual ocasião?</label>
+          <select
+            id="occasion"
+            name="occasion"
+            required
+            onchange="updateOcasionContext(this.value)"
+          >
+            <option value="">Selecione</option>
+            <option value="1">Dia a Dia / Leve</option>
+            <option value="2">Social / Encontro</option>
+            <option value="3">Especial / Celebração</option>
+          </select>
+          <div class="context-text" id="occasion_context"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="pairing">Com qual tipo de prato quer harmonizar?</label>
+          <select id="pairing" name="pairing" required>
+            <option value="">Selecione</option>
+            <option value="carne_vermelha">Carne Vermelha</option>
+            <option value="frutos_do_mar">Peixes e Frutos do Mar</option>
+            <option value="aves">Aves (Frango, Pato)</option>
+            <option value="massas">Massas e Pizzas</option>
+            <option option="queijos">Queijos</option>
+            <option value="sem_comida">Sem Comida (Apenas Social)</option>
+          </select>
+        </div>
+
+        <h3>Seu Perfil de Sensações (1 a 5)</h3>
+        <p class="help-text">
+          1 = Menos intenso / 5 = Mais intenso. Arraste para selecionar.
+        </p>
+
+        <div class="form-group slider-group">
+          <label for="sweetness">Nível de Doçura</label>
+          <p class="help-text">
+            O nível de doçura mede a quantidade de açúcar residual no vinho.
+          </p>
+          <input
+            type="range"
+            id="sweetness"
+            name="sweetness"
+            min="1"
+            max="5"
+            value="3"
+            oninput="updateSliderContext('sweetness', this.value)"
+          />
+          <div class="slider-value" id="sweetness_value">
+            3 (Semi-doce / Suave)
+          </div>
+          <div class="context-text" id="sweetness_context">
+            Doçura presente, mas ainda discreta.
+          </div>
+        </div>
+
+        <div class="form-group slider-group">
+          <label for="tannin">Nível de Tanino</label>
+          <p class="help-text">
+            Os taninos dão aquela sensação de secura na boca (adstringência) e
+            são exclusivos de vinhos tintos.
+          </p>
+          <input
+            type="range"
+            id="tannin"
+            name="tannin"
+            min="1"
+            max="5"
+            value="3"
+            oninput="updateSliderContext('tannin', this.value)"
+          />
+          <div class="slider-value" id="tannin_value">3 (Médio)</div>
+          <div class="context-text" id="tannin_context">
+            Taninos presentes, mas equilibrados.
+          </div>
+        </div>
+
+        <div class="form-group slider-group">
+          <label for="acidity">Nível de Acidez</label>
+          <p class="help-text">
+            A acidez é o que dá frescor e "vida" ao vinho (aquela sensação de
+            salivar).
+          </p>
+          <input
+            type="range"
+            id="acidity"
+            name="acidity"
+            min="1"
+            max="5"
+            value="3"
+            oninput="updateSliderContext('acidity', this.value)"
+          />
+          <div class="slider-value" id="acidity_value">
+            3 (Média / Fresca)
+          </div>
+          <div class="context-text" id="acidity_context">
+            Acidez bem equilibrada e vibrante.
+          </div>
+        </div>
+
+        <div class="form-group slider-group">
+          <label for="fruitiness">Nível de Frutado</label>
+          <p class="help-text">
+            Frutado deve ser entendido como a percepção de aromas de fruta no
+            vinho.
+          </p>
+          <input
+            type="range"
+            id="fruitiness"
+            name="fruitiness"
+            min="1"
+            max="5"
+            value="3"
+            oninput="updateSliderContext('fruitiness', this.value)"
+          />
+          <div class="slider-value" id="fruitiness_value">
+            3 (Fruta Média)
+          </div>
+          <div class="context-text" id="fruitiness_context">
+            Fruta evidente e equilibrada.
+          </div>
+        </div>
+
+        <button type="submit">Buscar Recomendações</button>
+      </form>
+    </div>
+
+    <script>
+      const contexts = {
+        sweetness: {
+          1: { label: "Seco", desc: "Sem dulçor residual perceptível." },
+          2: {
+            label: "Meio-Seco / Extra Seco",
+            desc: "Um toque sutil de doçura, para equilíbrio.",
+          },
+          3: {
+            label: "Semi-doce / Suave",
+            desc: "Doçura presente, mas ainda discreta.",
+          },
+          4: {
+            label: "Doce",
+            desc: "Claramente doce, ideal para vinhos de sobremesa leves.",
+          },
+          5: {
+            label: "Muito Doce / Licoroso",
+            desc: "Alto teor de açúcar, vinhos de sobremesa intensos.",
+          },
+        },
+        tannin: {
+          1: { label: "Leve", desc: "Pouca adstringência (ex: Pinot Noir, Gamay)." },
+          2: { label: "Médio-Baixo", desc: "Taninos macios e aveludados." },
+          3: { label: "Médio", desc: "Taninos presentes, mas equilibrados." },
+          4: { label: "Médio-Alto", desc: "Taninos firmes e estruturados." },
+          5: {
+            label: "Intenso",
+            desc: "Muita adstringência, vinhos robustos (ex: Cabernet Sauvignon, Tannat).",
+          },
+        },
+        acidity: {
+          1: { label: "Suave / Baixa", desc: "Redonda e cremosa, menos salivar." },
+          2: { label: "Média-Baixa", desc: "Acidez discreta, para equilíbrio." },
+          3: { label: "Média / Fresca", desc: "Acidez bem equilibrada e vibrante." },
+          4: { label: "Média-Alta", desc: "Acidez evidente e refrescante." },
+          5: {
+            label: "Alta / Vívida",
+            desc: "Acidez que faz salivar bastante (ex: Sauvignon Blanc, alguns Rieslings).",
+          },
+        },
+        fruitiness: {
+          1: {
+            label: "Mineral / Terroso",
+            desc: "Foco em notas não-frutadas (solo, pedra, especiarias).",
+          },
+          2: { label: "Fruta Discreta", desc: "Notas de fruta sutis, em segundo plano." },
+          3: { label: "Fruta Média", desc: "Fruta evidente e equilibrada." },
+          4: {
+            label: "Fruta Viva / Madura",
+            desc: "Aromas de frutas frescas, dominantes.",
+          },
+          5: {
+            label: "Fruta Intensa / Geléia",
+            desc: "Sabor de fruta muito concentrado, maduro (ex: vinhos Novo Mundo).",
+          },
+        },
+        occasion: {
+          1: "Vinhos acessíveis, para consumo casual e cotidiano.",
+          2: "Vinhos com bom custo-benefício, para jantares informais e happy hours.",
+          3: "Vinhos de guarda, mais caros ou com complexidade, para datas e eventos importantes.",
+        },
+      };
+
+      function updateSliderContext(attribute, value) {
+        const data = contexts[attribute][value];
+        document.getElementById(`${attribute}_value`).textContent = `${value} (${data.label})`;
+        document.getElementById(`${attribute}_context`).textContent = data.desc;
+      }
+
+      function updateOcasionContext(value) {
+        const contextText = contexts.occasion[value] || "";
+        document.getElementById("occasion_context").textContent = contextText;
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateSliderContext("sweetness", 3);
+        updateSliderContext("tannin", 3);
+        updateSliderContext("acidity", 3);
+        updateSliderContext("fruitiness", 3);
+      });
+    </script>
+  </body>
+</html>

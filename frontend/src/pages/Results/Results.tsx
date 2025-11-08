@@ -1,236 +1,178 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import '../../styles/base.css';
-import WineCard from './WineCard';
-import type { WineRecommendation } from '../../types/Wine';
-import { Dropdown } from 'primereact/dropdown';
+// src/pages/Results/Results.tsx
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { WineRecommendation } from "../../types/Wine";
 
-const typeColors: Record<string, string> = {
-  tinto: '#7b2d26',
-  branco: '#d4a017',
-  rosé: '#e89cae',
-  rose: '#e89cae',
-  espumante: '#f0c674',
-};
+interface SortedOption {
+  label: string;
+  value: "none" | "asc" | "desc";
+}
 
 const Results: React.FC = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const wines = (location.state?.wines || []) as WineRecommendation[];
-  const userProfile = location.state?.userProfile || {};
 
-  const [sortOrder, setSortOrder] = useState<string>('none');
+  const [recommendations, setRecommendations] = useState<WineRecommendation[]>([]);
+  const [sortOption, setSortOption] = useState<"none" | "asc" | "desc">("none");
 
-  const sortOptions = [
-    { label: 'Sem ordenação', value: 'none' },
-    { label: 'Preço: menor para maior', value: 'asc' },
-    { label: 'Preço: maior para menor', value: 'desc' },
-  ];
+  // 🔁 Carrega as recomendações salvas no localStorage
+  useEffect(() => {
+    const storedRecs = localStorage.getItem("wine_recommendations");
+    if (storedRecs) {
+      setRecommendations(JSON.parse(storedRecs));
+    }
+  }, []);
 
-  const sortedWines = [...wines].sort((a, b) => {
-    if (sortOrder === 'asc') return (a.preco_medio ?? 0) - (b.preco_medio ?? 0);
-    if (sortOrder === 'desc') return (b.preco_medio ?? 0) - (a.preco_medio ?? 0);
+  // 🔄 Ordenação dinâmica conforme seleção
+  const sortedRecommendations = [...recommendations].sort((a, b) => {
+    if (sortOption === "asc") return (a.preco_medio ?? 0) - (b.preco_medio ?? 0);
+    if (sortOption === "desc") return (b.preco_medio ?? 0) - (a.preco_medio ?? 0);
+
     return 0;
   });
 
-  const handleRestart = () => navigate('/questionary');
-  const handleBack = () => navigate(-1);
+  // 🔙 Voltar para o questionário
+  const handleBack = () => {
+    navigate("/questionario");
+  };
 
-  if (!wines || wines.length === 0) {
-    return (
-      <motion.div
-        className="page-container"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.6 }}
-        style={{ textAlign: 'center' }}
-      >
-        <h2>🍇 Nenhuma recomendação encontrada</h2>
-        <p>Tente ajustar suas preferências e responder novamente o questionário.</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-          <button onClick={handleRestart}>Refazer Questionário</button>
-          <button onClick={handleBack}>Voltar</button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  const tipoVinho = wines[0]?.tipo?.toLowerCase() || userProfile.preferencia_vinho || '';
-  const harmonizacao = wines[0]?.harmonizacao || userProfile.harmonizacao || '';
-  const tipoFormatado = tipoVinho.charAt(0).toUpperCase() + tipoVinho.slice(1).toLowerCase();
-  const corTipo = typeColors[tipoVinho] || '#7b2d26';
-  const tituloDinamico = harmonizacao
-    ? `🍷 Recomendações para vinhos ${tipoFormatado}s — harmonização com ${harmonizacao}`
-    : `🍷 Recomendações para vinhos ${tipoFormatado}s`;
+  // 🔠 Opções da caixa de ordenação
+  const sortOptions: SortedOption[] = [
+    { label: "🔹 Sem ordenação", value: "none" },
+    { label: "⬆️ Preço: menor → maior", value: "asc" },
+    { label: "⬇️ Preço: maior → menor", value: "desc" },
+  ];
 
   return (
-    <motion.div
-      className="page-container"
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -50 }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
-    >
-      {/* Cabeçalho */}
-      <header
+    <div className="page-container" style={{ alignItems: "stretch" }}>
+      <h2 className="text-xl mb-3 text-primary">🍷 Resultados da sua recomendação</h2>
+
+      {/* 🔽 Caixa de seleção de ordenação */}
+      <div style={{ marginBottom: "16px", textAlign: "center" }}>
+        <label htmlFor="sort" style={{ marginRight: "8px", fontWeight: 500 }}>
+          Ordenar por:
+        </label>
+        <select
+          id="sort"
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value as "none" | "asc" | "desc")}
+          style={{
+            padding: "6px 10px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            fontSize: "0.95rem",
+          }}
+        >
+          {sortOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* 🔁 Renderização dos vinhos recomendados */}
+      <div
+        className="grid"
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '16px',
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "20px",
+          justifyContent: "center",
         }}
       >
-        <h2 style={{ color: corTipo }}>{tituloDinamico}</h2>
+        {sortedRecommendations.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#777" }}>
+            Nenhuma recomendação encontrada.
+          </p>
+        ) : (
+          sortedRecommendations.map((wine) => (
+            <div
+              key={wine.id}
+              className="shadow-3 border-round-2xl"
+              style={{
+                border: "1px solid #eee",
+                borderRadius: "12px",
+                padding: "16px",
+                backgroundColor: "#fff",
+                textAlign: "center",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
+            >
+              {/* 🖼️ Rótulo */}
+              {wine.rotulo_url ? (
+                <img
+                  src={wine.rotulo_url}
+                  alt={`Rótulo de ${wine.titulo}`}
+                  style={{
+                    width: "100%",
+                    height: "320px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                    marginBottom: "10px",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "320px",
+                    borderRadius: "8px",
+                    backgroundColor: "#f3f3f3",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: "#aaa",
+                    marginBottom: "10px",
+                  }}
+                >
+                  📦 Sem imagem disponível
+                </div>
+              )}
+
+              {/* 🏷️ Informações do vinho */}
+              <h3 style={{ marginBottom: "8px", color: "#4a148c" }}>{wine.titulo}</h3>
+              <p style={{ margin: "4px 0", fontWeight: 500 }}>
+                {wine.tipo} • {wine.pais}
+              </p>
+              <p style={{ margin: "4px 0", color: "#666" }}>
+                Uva: {wine.uva} <br />
+                Harmonização: {wine.harmonizacao}
+              </p>
+
+              {/* 💰 Preço formatado */}
+              <p style={{ fontWeight: 600, color: "#7b2d26" }}>
+                {wine.preco_medio
+                  ? wine.preco_medio.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })
+                  : "Preço não informado"}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* 🔙 Botão de voltar */}
+      <div style={{ textAlign: "center", marginTop: "24px" }}>
         <button
           onClick={handleBack}
           style={{
-            backgroundColor: '#ddd',
-            color: '#333',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            border: 'none',
-            cursor: 'pointer',
+            backgroundColor: "#7b1fa2",
+            color: "white",
+            border: "none",
+            padding: "10px 18px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: 500,
           }}
         >
-          ← Voltar
+          Voltar ao questionário
         </button>
-      </header>
-
-      {/* Seletor de ordenação */}
-      <div className="flex justify-content-end mb-3" style={{ marginBottom: '1.5rem' }}>
-        <Dropdown
-          value={sortOrder}
-          options={sortOptions}
-          onChange={(e) => setSortOrder(e.value)}
-          placeholder="Ordenar por"
-          className="w-20rem"
-        />
       </div>
-
-      {/* Lista de vinhos */}
-      <motion.div
-        layout
-        style={{
-          display: 'grid',
-          gap: '16px',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          marginTop: '20px',
-        }}
-      >
-        {sortedWines.map((wine) => {
-          const tipo = wine.tipo?.toLowerCase?.() || '';
-          const color = typeColors[tipo] || '#ccc';
-          const emoji =
-            wine.tipo?.toLowerCase().includes('tinto') ? '🍷' :
-            wine.tipo?.toLowerCase().includes('branco') ? '🥂' :
-            wine.tipo?.toLowerCase().includes('ros') ? '🌸' :
-            '✨';
-
-          return (
-            <motion.div
-              key={wine.id}
-              layout
-              whileHover={{ scale: 1.03 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-              style={{
-                borderRadius: '12px',
-                backgroundColor: '#fafafa',
-                boxShadow: '0 1px 6px rgba(0,0,0,0.1)',
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{ height: '8px', backgroundColor: color }} />
-              <div style={{ padding: '16px' }}>
-                {wine.rotulo_url ? (
-                  <motion.img
-                    src={wine.rotulo_url}
-                    alt={wine.titulo}
-                    style={{
-                      width: '100%',
-                      height: '240px',
-                      objectFit: 'cover',
-                      borderRadius: '8px',
-                      marginBottom: '12px',
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.4 }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '240px',
-                      backgroundColor: '#eee',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      borderRadius: '8px',
-                      color: '#999',
-                      fontStyle: 'italic',
-                    }}
-                  >
-                    Sem imagem
-                  </div>
-                )}
-
-                <h3 style={{ margin: '8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{emoji}</span> {wine.titulo}
-                </h3>
-
-                <p style={{ margin: '4px 0', color: '#555' }}>
-                  <strong>Tipo:</strong> {wine.tipo} <br />
-                  <strong>Origem:</strong> {wine.pais} <br />
-                  <strong>Uva:</strong> {wine.uva}
-                </p>
-
-                {wine.similarity && (
-                  <p style={{ color: '#b22222', fontWeight: 'bold' }}>
-                    Compatibilidade: {(wine.similarity * 100).toFixed(1)}%
-                  </p>
-                )}
-
-                <p style={{ margin: '4px 0', color: '#444' }}>
-                  {wine.harmonizacao && (
-                    <>
-                      🍽️ <strong>Ideal para:</strong> {wine.harmonizacao}
-                      <br />
-                    </>
-                  )}
-                  💰 <strong>Preço médio:</strong>{' '}
-                  {wine.preco_medio?.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                  })}
-                </p>
-
-                {wine.descricao && (
-                  <p
-                    style={{
-                      marginTop: '8px',
-                      fontSize: '0.9em',
-                      color: '#555',
-                      textAlign: 'justify',
-                    }}
-                  >
-                    {wine.descricao}
-                  </p>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-
-      {/* Botões inferiores */}
-      <div style={{ textAlign: 'center', marginTop: '24px' }}>
-        <button onClick={handleRestart} style={{ marginRight: '12px' }}>
-          Refazer Questionário
-        </button>
-        <button onClick={handleBack}>Voltar</button>
-      </div>
-    </motion.div>
+    </div>
   );
 };
 

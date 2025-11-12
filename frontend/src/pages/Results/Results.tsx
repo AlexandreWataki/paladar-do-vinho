@@ -30,11 +30,6 @@ const Results: React.FC = () => {
     return 0;
   });
 
-  // 🔙 Voltar para o questionário
-  const handleBack = () => {
-    navigate("/questionario");
-  };
-
   // 🔠 Opções da caixa de ordenação
   const sortOptions: SortedOption[] = [
     { label: "🔹 Sem ordenação", value: "none" },
@@ -158,7 +153,8 @@ const Results: React.FC = () => {
       {/* 🔙 Botão de voltar */}
       <div style={{ textAlign: "center", marginTop: "24px" }}>
         <button
-          onClick={handleBack}
+          type="button"
+          onClick={() => navigate('/questionary')} // ✅ redireciona corretamente
           style={{
             backgroundColor: "#7b1fa2",
             color: "white",
@@ -167,7 +163,10 @@ const Results: React.FC = () => {
             borderRadius: "8px",
             cursor: "pointer",
             fontWeight: 500,
+            transition: "background-color 0.2s ease",
           }}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#9c27b0")}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#7b1fa2")}
         >
           Voltar ao questionário
         </button>

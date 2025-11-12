@@ -66,19 +66,26 @@ def login_for_access_token(user_data: UserLogin, db: Session = Depends(get_db)):
 
     if not user or not verify_password(user_data.senha, user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
+    
+    print(f"[DEBUG] Cargo salvo no banco para {user.email}: '{user.cargo}'")
 
+    # 🔹 Garante que o cargo correto está sendo usado
+    cargo = user.cargo.strip().capitalize() if user.cargo else "Cliente"
+
+    # 🔹 Gera o token com o cargo certo
     access_token = create_access_token(
-        data={"sub": user.email, "role": user.cargo},  # ✅ usa 'cargo' (compatível com seu modelo)
+        data={"sub": user.email, "role": cargo},
         expires_delta=timedelta(minutes=60)
     )
 
-    print(f"[AUTH] ✅ Login bem-sucedido: {user.email} | Cargo: {user.cargo}")
-    return {
-    "access_token": access_token,
-    "token_type": "bearer",
-    "role": user.cargo  # 👈 adiciona o cargo (Administrador ou Cliente)
-    }
+    print(f"[AUTH] ✅ Login bem-sucedido: {user.email} | Cargo: {cargo}")
 
+    # 🔹 Retorna JSON coerente
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": cargo
+    }
 
 # ---------------------------------------------------------
 # 3️⃣ ESQUECI MINHA SENHA

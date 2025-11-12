@@ -4,42 +4,53 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
-from backend.models.wine import Wine, WineRecommendation, WineCreate
+# Importe WineRead aqui
+from backend.models.wine import Wine, WineRecommendation, WineCreate, WineRead 
+# ^ Certifique-se de que WineRead está nesta importação
+
 from backend.models.user import User
 from backend.models.database import get_db
 from backend.recommender import WineRecommender
-from backend.security import verificar_admin  # ✅ controle de acesso de administrador
+from backend.security import verificar_admin 
 
-# ✅ Cria o roteador (deve vir antes de qualquer rota)
-router = APIRouter(prefix="/admin/vinhos", tags=["Administração"])
+# ---------------------------
+# 1. CRIAÇÃO DO ROUTER (CORREÇÃO DA ORDEM)
+# ---------------------------
+# ✅ CORREÇÃO: Deve ser a primeira coisa no arquivo para evitar NameError
+router = APIRouter(prefix="/admin/vinhos", tags=["Administração"]) 
 
-# Instância global do recomendador (para recarregar os dados após alterações)
+# Instância global do recomendador
 wine_recommender_instance = WineRecommender()
 
 
 # ---------------------------
 # LISTAR VINHOS
 # ---------------------------
-@router.get("/", response_model=List[WineRecommendation])
+@router.get("/", response_model=List[WineRead]) 
 async def listar_vinhos_admin(
     db: Session = Depends(get_db),
     user: User = Depends(verificar_admin)
 ):
     vinhos = db.query(Wine).all()
     if not vinhos:
+        # Nota: Retornar uma lista vazia ([]) é comum, mas o 404 está OK se a lista for nula
         raise HTTPException(status_code=404, detail="Nenhum vinho encontrado.")
-    return [WineRecommendation.model_validate(v.__dict__) for v in vinhos]
+        
+    # ✅ CORREÇÃO: Usa WineRead, que mapeia os tipos INT do banco, resolvendo o Erro 500
+    return [WineRead.model_validate(v.__dict__) for v in vinhos]
 
 
 # ---------------------------
 # CRIAR VINHO
 # ---------------------------
-@router.post("/", response_model=WineRecommendation, status_code=status.HTTP_201_CREATED)
+# 🛑 CORREÇÃO: Retorna WineRead (o objeto lido do DB) em vez de WineCreate (schema de input)
+@router.post("/", response_model=WineRead, status_code=status.HTTP_201_CREATED) 
 async def criar_vinho_admin(
     dados_vinho: WineCreate,
     db: Session = Depends(get_db),
     user: User = Depends(verificar_admin)
 ):
+    # Cria o objeto Wine (ORM) a partir do input (WineCreate)
     novo_vinho = Wine(**dados_vinho.model_dump())
     db.add(novo_vinho)
     db.commit()
@@ -49,16 +60,18 @@ async def criar_vinho_admin(
     global wine_recommender_instance
     wine_recommender_instance = WineRecommender()
 
-    return WineRecommendation.model_validate(novo_vinho.__dict__)
+    # ✅ Retorna o objeto recém-criado, validado com o schema de leitura
+    return WineRead.model_validate(novo_vinho.__dict__)
 
 
 # ---------------------------
 # ATUALIZAR VINHO
 # ---------------------------
-@router.put("/{vinho_id}", response_model=WineRecommendation)
+# 🛑 CORREÇÃO: Retorna WineRead (o objeto lido do DB) em vez de WineCreate (schema de input)
+@router.put("/{vinho_id}", response_model=WineRead) 
 async def atualizar_vinho_admin(
     vinho_id: int,
-    dados_vinho: WineCreate,
+    dados_vinho: WineCreate, # Usa WineCreate para receber o INPUT
     db: Session = Depends(get_db),
     user: User = Depends(verificar_admin)
 ):
@@ -75,7 +88,8 @@ async def atualizar_vinho_admin(
     global wine_recommender_instance
     wine_recommender_instance = WineRecommender()
 
-    return WineRecommendation.model_validate(vinho.__dict__)
+    # ✅ Retorna o objeto atualizado, validado com o schema de leitura
+    return WineRead.model_validate(vinho.__dict__)
 
 
 # ---------------------------

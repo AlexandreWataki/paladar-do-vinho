@@ -28,10 +28,20 @@ const AdminPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await fetchWines();
-      setWines(data);
+      console.log("🍷 Dados recebidos do backend:", data);
+
+      // ✅ Garantir que o retorno seja sempre um array válido
+      if (Array.isArray(data)) {
+        setWines(data);
+      } else if (data && typeof data === "object") {
+        setWines([data]);
+      } else {
+        setWines([]);
+      }
     } catch (error) {
-      console.error('Erro ao carregar vinhos:', error);
-      alert('Erro ao carregar lista de vinhos.');
+      console.error("Erro ao carregar vinhos:", error);
+      alert("Erro ao carregar lista de vinhos.");
+      setWines([]);
     } finally {
       setLoading(false);
     }
@@ -58,10 +68,10 @@ const AdminPage: React.FC = () => {
   };
 
   const priceTemplate = (rowData: WineData) =>
-    rowData.preco_medio.toLocaleString('pt-BR', {
+    rowData.preco_medio?.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    });
+    }) ?? "—";
 
   const actionTemplate = (rowData: WineData) => (
     <div
@@ -103,18 +113,16 @@ const AdminPage: React.FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
     >
-        <Card
-          className="w-full shadow-3 border-round-2xl p-4"
-          style={{
-            overflow: 'visible',      // ✅ permite dropdowns flutuarem
-            minHeight: '85vh',        // ✅ mantém altura adequada
-            position: 'relative',     // ✅ z-index context
-            zIndex: 1
-          }}
-        >
-
-      
-        {/* ===================== TOPO DO CARD ===================== */}
+      <Card
+        className="w-full shadow-3 border-round-2xl p-4"
+        style={{
+          overflow: 'visible',
+          minHeight: '85vh',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        {/* ===================== TOPO ===================== */}
         <div
           style={{
             display: 'flex',
@@ -123,7 +131,7 @@ const AdminPage: React.FC = () => {
             background: 'linear-gradient(90deg, #6a1b9a, #8e24aa, #ba68c8)',
             padding: '1.3rem 2.5rem',
             borderRadius: '12px 12px 0 0',
-            boxShadow: '0 4px 12px rgba(149, 70, 184, 0.25)', // 💜 leve sombra vinho
+            boxShadow: '0 4px 12px rgba(149, 70, 184, 0.25)',
             color: '#fff',
           }}
         >
@@ -138,8 +146,12 @@ const AdminPage: React.FC = () => {
               borderRadius: '8px',
               transition: '0.3s',
             }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#ffffff44')}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff22')}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.backgroundColor = '#ffffff44')
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = '#ffffff22')
+            }
             onClick={handleNew}
           />
 
@@ -167,8 +179,12 @@ const AdminPage: React.FC = () => {
               borderRadius: '8px',
               transition: '0.3s',
             }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#ffffff44')}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff22')}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.backgroundColor = '#ffffff44')
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = '#ffffff22')
+            }
             onClick={() => {
               localStorage.removeItem('access_token');
               localStorage.removeItem('role');
@@ -223,7 +239,7 @@ const AdminPage: React.FC = () => {
           </DataTable>
         </div>
 
-        {/* ===================== RODAPÉ (Paginação + Espaço) ===================== */}
+        {/* ===================== RODAPÉ ===================== */}
         <div
           style={{
             height: '2rem',

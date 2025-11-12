@@ -1,18 +1,20 @@
 // src/api/adminWines.ts
-const API_BASE_URL = 'http://127.0.0.1:8000/admin/vinhos/'; // ✅ note o / no final
+
+// ✅ CORREÇÃO: Usa o mesmo host do backend (127.0.0.1) e rota base consistente
+const API_BASE_URL = 'http://127.0.0.1:8000/admin/vinhos';
 
 // Função auxiliar para pegar o token do localStorage e montar o header
 function getAuthHeaders() {
   const token = localStorage.getItem('access_token');
   return {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}), // ✅ envia Bearer Token
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 
 // 🔹 LISTAR VINHOS
 export async function fetchWines() {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(`${API_BASE_URL}/`, {
     method: 'GET',
     headers: getAuthHeaders(),
   });
@@ -28,7 +30,7 @@ export async function fetchWines() {
 
 // 🔹 CRIAR VINHO
 export async function createWine(data: any) {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(`${API_BASE_URL}/`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -45,7 +47,8 @@ export async function createWine(data: any) {
 
 // 🔹 ATUALIZAR VINHO
 export async function updateWine(id: number, data: any) {
-  const response = await fetch(`${API_BASE_URL}${id}`, {
+  // ⚠️ Adicionada barra antes do ID
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -62,7 +65,8 @@ export async function updateWine(id: number, data: any) {
 
 // 🔹 EXCLUIR VINHO
 export async function deleteWine(id: number) {
-  const response = await fetch(`${API_BASE_URL}${id}`, {
+  // ⚠️ Adicionada barra antes do ID
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });

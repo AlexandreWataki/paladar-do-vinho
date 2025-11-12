@@ -11,6 +11,7 @@ import Questionary from './pages/Questionary/Questionary';
 import Results from './pages/Results/Results';
 import Login from './pages/Login/Login';
 import AdminLogin from './pages/Login/AdminLogin';
+import AccessDenied from './pages/AccessDenied/AccessDenied';
 
 import './styles/base.css';
 
@@ -132,6 +133,9 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* 🚨 Rota para acesso negado */}
+        <Route path="/acesso-negado" element={<AccessDenied />} />
       </Routes>
     </BrowserRouter>
   );

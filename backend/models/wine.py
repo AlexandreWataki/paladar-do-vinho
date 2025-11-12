@@ -20,7 +20,7 @@ class Wine(Base):
     rotulo_url = Column(String, nullable=True)
     descricao = Column(String, nullable=True)
 
-    # Campos usados pelo algoritmo - Agora todos obrigatórios para a recomendação
+    # Campos usados pelo algoritmo - MANTIDOS COMO INTEGER (embora armazenem strings no DB)
     nivel_docura = Column(Integer, nullable=False)
     nivel_tanino = Column(Integer, nullable=False)
     nivel_acidez = Column(Integer, nullable=False)
@@ -35,17 +35,10 @@ class Wine(Base):
 
 # Modelo para as respostas do questionário (INPUT do cliente)
 class WineQuestionnaire(BaseModel):
-    """Respostas fornecidas pelo usuário no questionário de preferências."""
-
+    # ... (Mantido igual) ...
     preferencia_vinho: str = Field(..., description="Tipo de vinho preferido (tinto, branco, rosé, espumante)")
-    
-    # ✅ CORRIGIDO: Deve ser INT (1, 2, ou 3) para bater com o React e Recommender.py
     ocasiao: int = Field(..., ge=1, le=3, description="Ocasião ID (1=Leve, 3=Especial)") 
-    
-    # ✅ CORRIGIDO: Deve ser STR e é obrigatório (slug do frontend)
     harmonizacao: str = Field(..., description="Tipo de prato em formato slug (ex: carne_vermelha)")
-    
-    # ✅ CORRIGIDO: Tornados obrigatórios (não Optional) já que o React envia um valor padrão
     nivel_docura: int = Field(..., ge=1, le=5, description="Preferência de doçura (1=seco, 5=doce)")
     nivel_tanino: int = Field(..., ge=1, le=5, description="Nível de tanino preferido")
     nivel_acidez: int = Field(..., ge=1, le=5, description="Preferência de acidez")
@@ -53,7 +46,7 @@ class WineQuestionnaire(BaseModel):
 
 # Modelo de recomendação de vinho (OUTPUT da API)
 class WineRecommendation(BaseModel):
-    """Saída do algoritmo de recomendação"""
+    # ... (Mantido igual) ...
     id: int
     titulo: str
     tipo: str
@@ -63,8 +56,6 @@ class WineRecommendation(BaseModel):
     rotulo_url: Optional[str] = None
     descricao: Optional[str] = None
     harmonizacao: Optional[str] = None
-    
-    # ✅ ADICIONADO: Campos calculados e de feedback
     score: float = Field(..., description="Pontuação de compatibilidade calculada (máx 11.0).")
     user_occasion: str = Field(..., description="Rótulo da Ocasião do Usuário (ex: Social / Encontro).")
     user_pairing: str = Field(..., description="Rótulo da Harmonização do Usuário (ex: Carne Vermelha).")
@@ -72,7 +63,7 @@ class WineRecommendation(BaseModel):
     model_config = {'from_attributes': True}
 
 
-# Modelo para criação/edição de vinho (input do admin) - Mantido igual, apenas o alinhamento da Ocasião
+# Modelo para criação/edição de vinho (input do admin) - Mantido igual
 class WineCreate(BaseModel):
     titulo: str
     pais: str
@@ -85,8 +76,30 @@ class WineCreate(BaseModel):
     nivel_tanino: int = Field(..., ge=1, le=5)
     nivel_acidez: int = Field(..., ge=1, le=5)
     nivel_frutado: int = Field(..., ge=1, le=5)
-    ocasiao: int = Field(..., ge=1, le=3) # ID numérico da Ocasião
+    ocasiao: int = Field(..., ge=1, le=3) 
     harmonizacao: str
+
+    model_config = {'from_attributes': True}
+
+# 🆕 ADICIONADO: Modelo de Leitura (READ) para a Saída do CRUD
+class WineRead(BaseModel):
+    id: int
+    titulo: str
+    tipo: str
+    pais: str
+    uva: str
+    preco_medio: float
+    rotulo_url: Optional[str] = None
+    descricao: Optional[str] = None
+    harmonizacao: Optional[str] = None
+    
+    # 🚨 CORRIGIDO: Tipos alterados para STR para aceitar os valores descritivos
+    # que estão no banco de dados e resolver o ValidationError.
+    nivel_docura: str
+    nivel_tanino: str
+    nivel_acidez: str
+    nivel_frutado: str
+    ocasiao: str 
 
     model_config = {'from_attributes': True}
 

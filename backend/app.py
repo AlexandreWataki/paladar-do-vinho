@@ -1,5 +1,4 @@
 # backend/app.py
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -16,10 +15,10 @@ from backend.routes.admin_routes import router as admin_router
 # -------------------------------
 print("🚀 Inicializando FastAPI com suporte CORS ativo...")
 
-# Cria as tabelas no banco de dados (caso não existam)
+# Cria as tabelas no banco (caso não existam)
 Base.metadata.create_all(bind=engine)
 
-# Instancia o aplicativo FastAPI com debug ativado
+# Instancia o aplicativo FastAPI
 app = FastAPI(
     title="Paladar de Vinho API",
     debug=True
@@ -28,14 +27,17 @@ app = FastAPI(
 # -------------------------------
 # 2️⃣ CONFIGURAÇÃO DO CORS
 # -------------------------------
+# ⚠️ Incluímos as variações com localhost e 127.0.0.1 para evitar bloqueios
 origins = [
+    "http://localhost",
     "http://localhost:5173",
+    "http://127.0.0.1",
     "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,       # ⚠️ Não use "*" se allow_credentials=True
+    allow_origins=origins,        # origens permitidas
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -66,4 +68,4 @@ def root():
 # 5️⃣ EXECUÇÃO LOCAL
 # -------------------------------
 if __name__ == "__main__":
-    uvicorn.run("backend.app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("backend.app:app", host="127.0.0.1", port=8000, reload=True)

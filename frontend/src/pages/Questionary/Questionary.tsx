@@ -1,3 +1,4 @@
+// src/pages/Questionary/Questionary.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRecommendations } from "../../api/wines";
@@ -6,18 +7,19 @@ import "../../styles/base.css";
 const Questionary: React.FC = () => {
   const navigate = useNavigate();
 
-  // Estados dos campos
+  // 🧠 Estados dos campos
   const [preferencia, setPreferencia] = useState("");
   const [ocasiao, setOcasiao] = useState("");
   const [harmonizacao, setHarmonizacao] = useState("");
   const [docura, setDocura] = useState(3);
   const [tanino, setTanino] = useState(3);
+  const isTinto = preferencia.toLowerCase() === "tinto";
   const [acidez, setAcidez] = useState(3);
   const [frutado, setFrutado] = useState(3);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
 
-  // Dados auxiliares
+  // 🍷 Dados auxiliares
   const tiposVinho = ["Tinto", "Branco", "Rosé", "Espumante"];
   const ocasioes = [
     { id: 1, nome: "Dia a Dia / Leve" },
@@ -33,7 +35,7 @@ const Questionary: React.FC = () => {
     "Sem Comida (Apenas Social)",
   ];
 
-  // Contextos de cada atributo (descrições)
+  // 🎯 Contextos explicativos
   const contexts: Record<string, any> = {
     sweetness: {
       1: { label: "Seco", desc: "Sem dulçor residual perceptível." },
@@ -70,13 +72,20 @@ const Questionary: React.FC = () => {
     },
   };
 
-  // Atualiza contexto da ocasião
+  // 🗓️ Contexto da ocasião
   const getOcasionContext = (value: string) => {
     const num = parseInt(value);
     return contexts.occasion[num] || "";
   };
 
-  // Envio do formulário
+  // 🧠 Ajuste automático: “Carne Vermelha” => “Tinto”
+  useEffect(() => {
+    if (harmonizacao.toLowerCase().includes("carne vermelha")) {
+      setPreferencia("Tinto");
+    }
+  }, [harmonizacao]);
+
+  // 📤 Envio do formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
@@ -100,16 +109,27 @@ const Questionary: React.FC = () => {
       };
 
       const recs = await getRecommendations(questionnaireData);
+
+      if (!recs || recs.length === 0) {
+        setErro("Nenhum vinho foi encontrado para o seu perfil. Tente ajustar as preferências ou harmonização.");
+        return;
+      }
+
       localStorage.setItem("wine_recommendations", JSON.stringify(recs));
       navigate("/resultados");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao buscar recomendações:", error);
-      setErro("Erro ao buscar recomendações. Tente novamente mais tarde.");
+      if (error.response?.status === 404) {
+        setErro("Nenhuma recomendação encontrada para o perfil informado. Experimente mudar a harmonização ou tipo de vinho.");
+      } else {
+        setErro("Erro ao buscar recomendações. Tente novamente mais tarde.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // 🧾 Renderização
   return (
     <div className="page-container">
       <div className="wine-profile-container">
@@ -166,14 +186,31 @@ const Questionary: React.FC = () => {
                 </option>
               ))}
             </select>
+
+            {/* 💬 Mensagem contextual dinâmica */}
+            {harmonizacao && (
+              <div className="context-text" style={{ marginTop: "8px", color: "#6a1b9a" }}>
+                {harmonizacao.toLowerCase().includes("carne vermelha") && (
+                  <>🍖 Harmonização com carnes vermelhas favorece vinhos <strong>tintos</strong> mais encorpados.</>
+                )}
+                {harmonizacao.toLowerCase().includes("frango") && (
+                  <>🍗 Harmonização com aves combina bem com vinhos <strong>brancos</strong> ou <strong>tintos leves</strong>.</>
+                )}
+                {harmonizacao.toLowerCase().includes("peixe") && (
+                  <>🐟 Pratos com peixes pedem vinhos <strong>brancos</strong> ou <strong>rosés</strong>.</>
+                )}
+                {harmonizacao.toLowerCase().includes("queijo") && (
+                  <>🧀 Queijos combinam bem com vinhos <strong>tintos</strong> ou <strong>espumantes</strong>.</>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Sliders de perfil sensorial */}
+          {/* Sliders */}
           <h3>Seu Perfil de Sensações (1 a 5)</h3>
-          <p className="help-text">
-            1 = Menos intenso / 5 = Mais intenso. Arraste para selecionar.
-          </p>
+          <p className="help-text">1 = Menos intenso / 5 = Mais intenso.</p>
 
+          {/* Doçura */}
           <div className="form-group slider-group">
             <label>Nível de Doçura</label>
             <input
@@ -189,6 +226,7 @@ const Questionary: React.FC = () => {
             <div className="context-text">{contexts.sweetness[docura].desc}</div>
           </div>
 
+          {/* Tanino */}
           <div className="form-group slider-group">
             <label>Nível de Tanino</label>
             <input
@@ -197,13 +235,25 @@ const Questionary: React.FC = () => {
               max="5"
               value={tanino}
               onChange={(e) => setTanino(Number(e.target.value))}
+              disabled={!isTinto}
+              style={{
+                opacity: isTinto ? 1 : 0.5,
+                cursor: isTinto ? "pointer" : "not-allowed",
+              }}
             />
             <div className="slider-value">
-              {tanino} ({contexts.tannin[tanino].label})
+              {isTinto
+                ? `${tanino} (${contexts.tannin[tanino].label})`
+                : "— não aplicável —"}
             </div>
-            <div className="context-text">{contexts.tannin[tanino].desc}</div>
+            <div className="context-text">
+              {isTinto
+                ? contexts.tannin[tanino].desc
+                : "Taninos não são relevantes para vinhos brancos, rosés ou espumantes."}
+            </div>
           </div>
 
+          {/* Acidez */}
           <div className="form-group slider-group">
             <label>Nível de Acidez</label>
             <input
@@ -219,6 +269,7 @@ const Questionary: React.FC = () => {
             <div className="context-text">{contexts.acidity[acidez].desc}</div>
           </div>
 
+          {/* Frutado */}
           <div className="form-group slider-group">
             <label>Nível de Frutado</label>
             <input
@@ -231,14 +282,13 @@ const Questionary: React.FC = () => {
             <div className="slider-value">
               {frutado} ({contexts.fruitiness[frutado].label})
             </div>
-            <div className="context-text">{contexts.fruitiness[frutado].desc}</div>
+            <div className="context-text">
+              {contexts.fruitiness[frutado].desc}
+            </div>
           </div>
 
-          <button
-            type="submit"
-            className="recommend-btn"
-            disabled={loading}
-          >
+          {/* Botão */}
+          <button type="submit" className="recommend-btn" disabled={loading}>
             {loading ? "Carregando..." : "Buscar Recomendações"}
           </button>
 

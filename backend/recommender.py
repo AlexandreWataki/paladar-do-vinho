@@ -125,24 +125,39 @@ class WineRecommender:
     # 5️⃣ REGRAS DE NEGÓCIO
     # -------------------------------
     def _apply_business_rules(self, df: pd.DataFrame, user_profile: Dict[str, Any]) -> pd.DataFrame:
-        harm = user_profile.get('harmonizacao', '').lower()
-        if not harm or harm == 'sem comida':
+        harm = user_profile.get('harmonizacao', '').lower().strip()
+
+        # ⚙️ Nenhuma harmonização ou opção "sem comida"
+        if not harm or 'sem' in harm:
             return df
 
+        # 🍖 Carne Vermelha → força filtro para vinhos tintos
         if 'carne' in harm and 'vermelha' in harm:
             df = df[df['tipo'].str.contains('tinto', case=False, na=False)]
-        elif 'frango' in harm or 'porco' in harm:
+            return df  # ⬅️ força priorização (ignora o tipo escolhido)
+
+        # 🍗 Aves / Frango / Porco → tintos leves ou brancos
+        elif any(x in harm for x in ['ave', 'frango', 'porco']):
             df = df[df['tipo'].str.contains('tinto|branco', case=False, na=False)]
-        elif 'peixe' in harm or 'fruto' in harm:
-            df = df[df['tipo'].str.contains('branco|rosé|espumante', case=False, na=False)]
-        elif 'massas' in harm:
+
+        # 🐟 Peixes / Frutos do Mar → brancos, rosés e espumantes
+        elif any(x in harm for x in ['peixe', 'fruto', 'mar']):
+            df = df[df['tipo'].str.contains('branco|rosé|rose|espumante', case=False, na=False)]
+
+        # 🍝 Massas e Pizzas → tintos e brancos
+        elif any(x in harm for x in ['massa', 'pizza']):
             df = df[df['tipo'].str.contains('tinto|branco', case=False, na=False)]
-        elif 'vegetariano' in harm:
-            df = df[df['tipo'].str.contains('tinto|branco|rosé', case=False, na=False)]
-        elif 'queijos' in harm or 'frios' in harm:
+
+        # 🧀 Queijos / Frios → tintos, brancos e espumantes
+        elif any(x in harm for x in ['queijo', 'frios']):
             df = df[df['tipo'].str.contains('tinto|branco|espumante', case=False, na=False)]
 
+        # 🥦 Vegetariano → tintos leves, brancos e rosés
+        elif 'vegetariano' in harm:
+            df = df[df['tipo'].str.contains('tinto|branco|rosé|rose', case=False, na=False)]
+
         return df
+
 
     # -------------------------------
     # 6️⃣ RECOMENDAÇÃO FINAL
@@ -154,18 +169,17 @@ class WineRecommender:
 
         df = self.df.copy()
 
-        # 🔹 1. FILTRO PELO TIPO DE VINHO PREFERIDO
+         # 🔹 1. APLICA REGRAS DE NEGÓCIO (HARMONIZAÇÃO) PRIMEIRO
+        df = self._apply_business_rules(df, user_profile)
+
+        # 🔹 2. FILTRO PELO TIPO DE VINHO (SOMENTE SE A REGRA NÃO DEFINIR)
         wine_type = user_profile.get("preferencia_vinho", "").lower().strip()
-        if wine_type:
+        if wine_type and not (
+            'carne vermelha' in user_profile.get('harmonizacao', '').lower()
+        ):
             before_count = len(df)
             df = df[df["tipo"].str.contains(wine_type, case=False, na=False)]
             print(f"🍷 Filtro de tipo aplicado: '{wine_type}' → {len(df)} de {before_count} vinhos restantes.")
-
-        # 🔹 2. APLICA REGRAS DE NEGÓCIO (HARMONIZAÇÃO)
-        df = self._apply_business_rules(df, user_profile)
-        if df.empty:
-            print("⚠️ Nenhum vinho compatível com a harmonização selecionada.")
-            return []
 
         # 🔹 3. Garante que as colunas necessárias existem
         required_cols = ["id", "titulo", "tipo", "harmonizacao"]

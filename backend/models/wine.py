@@ -1,13 +1,13 @@
+# backend/models/wine.py
+
 from sqlalchemy import Column, Integer, String, Float
-from sqlalchemy.ext.declarative import declarative_base
+from backend.models.database import Base # Assumindo que a Base está definida em database.py
 from pydantic import BaseModel, Field
 from typing import Optional
 
-# -------------------------------
-# 1️⃣ SQLALCHEMY MODELS (DB)
-# -------------------------------
-Base = declarative_base()
-
+# -------------------------------------------------------------
+# 1️⃣ SQLALCHEMY MODEL (Tabela "vinhos")
+# -------------------------------------------------------------
 class Wine(Base):
     __tablename__ = "vinhos"
 
@@ -20,51 +20,39 @@ class Wine(Base):
     rotulo_url = Column(String, nullable=True)
     descricao = Column(String, nullable=True)
 
-    # Campos usados pelo algoritmo - MANTIDOS COMO INTEGER (embora armazenem strings no DB)
+    # Campos usados pelo algoritmo de recomendação
     nivel_docura = Column(Integer, nullable=False)
     nivel_tanino = Column(Integer, nullable=False)
     nivel_acidez = Column(Integer, nullable=False)
     nivel_frutado = Column(Integer, nullable=False)
-    ocasiao = Column(Integer, nullable=False) # ID numérico (1, 2, 3)
-    harmonizacao = Column(String, nullable=True) # Slug (ex: carne_vermelha)
+    ocasiao = Column(Integer, nullable=False)  # ID numérico (1, 2, 3)
+    harmonizacao = Column(String, nullable=True)  # Texto descritivo
 
 
-# -------------------------------
+# -------------------------------------------------------------
 # 2️⃣ Pydantic MODELS (API)
-# -------------------------------
-
-# Modelo para as respostas do questionário (INPUT do cliente)
-class WineQuestionnaire(BaseModel):
-    # ... (Mantido igual) ...
-    preferencia_vinho: str = Field(..., description="Tipo de vinho preferido (tinto, branco, rosé, espumante)")
-    ocasiao: int = Field(..., ge=1, le=3, description="Ocasião ID (1=Leve, 3=Especial)") 
-    harmonizacao: str = Field(..., description="Tipo de prato em formato slug (ex: carne_vermelha)")
-    nivel_docura: int = Field(..., ge=1, le=5, description="Preferência de doçura (1=seco, 5=doce)")
-    nivel_tanino: int = Field(..., ge=1, le=5, description="Nível de tanino preferido")
-    nivel_acidez: int = Field(..., ge=1, le=5, description="Preferência de acidez")
-    nivel_frutado: int = Field(..., ge=1, le=5, description="Intensidade de aromas frutados")
-
-# Modelo de recomendação de vinho (OUTPUT da API)
-class WineRecommendation(BaseModel):
-    # ... (Mantido igual) ...
+# -------------------------------------------------------------
+class WineRead(BaseModel):
     id: int
     titulo: str
     tipo: str
-    pais: Optional[str] = None
-    uva: Optional[str] = None
-    preco_medio: Optional[float] = None
+    pais: str
+    uva: str
+    preco_medio: float
     rotulo_url: Optional[str] = None
     descricao: Optional[str] = None
     harmonizacao: Optional[str] = None
-    score: float = Field(..., description="Pontuação de compatibilidade calculada (máx 11.0).")
-    user_occasion: str = Field(..., description="Rótulo da Ocasião do Usuário (ex: Social / Encontro).")
-    user_pairing: str = Field(..., description="Rótulo da Harmonização do Usuário (ex: Carne Vermelha).")
+    nivel_docura: int
+    nivel_tanino: int
+    nivel_acidez: int
+    nivel_frutado: int
+    ocasiao: int
 
     model_config = {'from_attributes': True}
 
-
-# Modelo para criação/edição de vinho (input do admin) - Mantido igual
+# 🚨 CLASSE FALTANTE ADICIONADA: Modelo de criação/edição para o admin
 class WineCreate(BaseModel):
+    """Modelo de dados de entrada para criação ou edição de um vinho (Admin)."""
     titulo: str
     pais: str
     uva: str
@@ -76,13 +64,24 @@ class WineCreate(BaseModel):
     nivel_tanino: int = Field(..., ge=1, le=5)
     nivel_acidez: int = Field(..., ge=1, le=5)
     nivel_frutado: int = Field(..., ge=1, le=5)
-    ocasiao: int = Field(..., ge=1, le=3) 
-    harmonizacao: str
+    ocasiao: int = Field(..., ge=1, le=5)
+    harmonizacao: Optional[str] = None
 
     model_config = {'from_attributes': True}
 
-# 🆕 ADICIONADO: Modelo de Leitura (READ) para a Saída do CRUD
-class WineRead(BaseModel):
+
+class WineQuestionnaire(BaseModel):
+    """Modelo das respostas do questionário do usuário."""
+    nivel_docura: int = Field(..., ge=1, le=5, description="Nível de doçura (1 a 5)")
+    nivel_tanino: int = Field(..., ge=1, le=5, description="Nível de tanino (1 a 5)")
+    nivel_acidez: int = Field(..., ge=1, le=5, description="Nível de acidez (1 a 5)")
+    nivel_frutado: int = Field(..., ge=1, le=5, description="Nível de frutado (1 a 5)")
+    ocasiao: int = Field(..., ge=1, le=5, description="Código numérico da ocasião")
+    harmonizacao: Optional[str] = Field(None, description="Prato ou tipo de harmonização")
+
+
+class WineRecommendation(BaseModel):
+    """Modelo de saída das recomendações."""
     id: int
     titulo: str
     tipo: str
@@ -91,45 +90,12 @@ class WineRead(BaseModel):
     preco_medio: float
     rotulo_url: Optional[str] = None
     descricao: Optional[str] = None
-    harmonizacao: Optional[str] = None
-    
-    # 🚨 CORRIGIDO: Tipos alterados para STR para aceitar os valores descritivos
-    # que estão no banco de dados e resolver o ValidationError.
-    nivel_docura: str
-    nivel_tanino: str
-    nivel_acidez: str
-    nivel_frutado: str
-    ocasiao: str 
+    nivel_docura: int
+    nivel_tanino: int
+    nivel_acidez: int
+    nivel_frutado: int
+    score: float = Field(..., description="Similaridade da recomendação")
+    user_occasion: Optional[str] = Field(None, description="Descrição textual da ocasião")
+    user_pairing: Optional[str] = Field(None, description="Harmonização sugerida")
 
     model_config = {'from_attributes': True}
-
-
-# -------------------------------
-# 3️⃣ USER / AUTH MODELS (Mantidos iguais)
-# -------------------------------
-class UserCreate(BaseModel):
-    nome_usuario: str
-    email: str
-    senha: str
-
-class UserLogin(BaseModel):
-    email: str
-    senha: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
-class UserResponse(BaseModel):
-    id: int
-    email: str
-    cargo: str
-
-    model_config = {'from_attributes': True}
-
-class PasswordResetRequest(BaseModel):
-    email: str
-
-class PasswordReset(BaseModel):
-    token: str
-    new_password: str

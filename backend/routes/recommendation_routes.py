@@ -3,9 +3,11 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 
+# ✅ Importação corrigida dos modelos Pydantic do domínio Wine
 from backend.models.wine import WineQuestionnaire, WineRecommendation
 from backend.recommender import WineRecommender
-# Assumindo que sua função de autenticação está em auth_routes.py
+
+# ✅ Autenticação do usuário
 from backend.routes.auth_routes import get_current_user
 
 # -------------------------------------------------------------
@@ -13,17 +15,17 @@ from backend.routes.auth_routes import get_current_user
 # -------------------------------------------------------------
 router = APIRouter(prefix="/recommendations", tags=["Recomendação"])
 
-# ✨ NOVO: Mapa para converter o ID da ocasião em um texto descritivo.
-#    Ajuste os textos para que correspondam às suas opções no frontend.
+# ✨ Mapa para converter o ID da ocasião em um texto descritivo
 OCCASION_MAP = {
     1: "Jantar Especial",
     2: "Evento Social",
     3: "Relaxar em Casa",
     4: "Presente",
-    # Adicione mais mapeamentos se necessário
 }
 
-# Inicializa o recomendador globalmente
+# -------------------------------------------------------------
+# INICIALIZAÇÃO DO RECOMENDADOR GLOBAL
+# -------------------------------------------------------------
 try:
     wine_recommender_instance = WineRecommender()
     print("✅ WineRecommender inicializado com sucesso.")
@@ -39,7 +41,6 @@ except Exception as e:
     "/",
     response_model=List[WineRecommendation],
     status_code=status.HTTP_200_OK,
-    # ✨ ADICIONADO: Garante que o endpoint só pode ser acessado por usuários logados.
     dependencies=[Depends(get_current_user)]
 )
 async def get_wine_recommendations(questionnaire: WineQuestionnaire):
@@ -53,12 +54,15 @@ async def get_wine_recommendations(questionnaire: WineQuestionnaire):
         )
 
     try:
+        # 🔹 Converte o modelo Pydantic em dicionário
         user_profile = wine_recommender_instance.process_user_answers(questionnaire.model_dump())
+
+        # 🔹 Gera recomendações
         recs = wine_recommender_instance.get_recommendations_from_profile(
             user_profile,
             num_recommendations=5
         )
-        print(f"DEBUG RECS: {len(recs)} vinhos encontrados.")
+        print(f"[DEBUG] {len(recs)} vinhos recomendados.")
     except Exception as e:
         print(f"❌ Erro interno ao gerar recomendações: {e}")
         raise HTTPException(
@@ -72,10 +76,11 @@ async def get_wine_recommendations(questionnaire: WineQuestionnaire):
             detail="Nenhuma recomendação encontrada para o perfil informado."
         )
 
-    # ✨ CORRIGIDO: Loop final para montar a resposta corretamente.
+    # -------------------------------------------------------------
+    # FORMATA A RESPOSTA FINAL (lista de WineRecommendation)
+    # -------------------------------------------------------------
     formatted_recs = []
     for r in recs:
-        # 'r' é o dicionário/objeto retornado pelo seu recomendador
         wine_data = {
             "id": r.get("id"),
             "titulo": r.get("titulo", "Vinho Desconhecido"),
@@ -90,7 +95,6 @@ async def get_wine_recommendations(questionnaire: WineQuestionnaire):
             "nivel_acidez": r.get("nivel_acidez", 0),
             "nivel_frutado": r.get("nivel_frutado", 0),
             "score": r.get("score", 0.0),
-            # ✨ CORREÇÃO PRINCIPAL: Converte o número da ocasião para texto.
             "user_occasion": OCCASION_MAP.get(questionnaire.ocasiao, "Não especificada"),
             "user_pairing": questionnaire.harmonizacao
         }

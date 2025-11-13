@@ -1,15 +1,13 @@
 # backend/models/user.py
 
 from sqlalchemy import Column, Integer, String, DateTime
+from backend.models.database import Base
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
 
-# Importa a mesma Base usada em wine.py (mantém o mesmo metadata)
-from .wine import Base
-
 # -------------------------------
-# 1. SQLALCHEMY MODEL (DB)
+# 1️⃣ SQLALCHEMY MODEL (DB)
 # -------------------------------
 class User(Base):
     __tablename__ = "users"
@@ -19,15 +17,13 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     cargo = Column(String, default="Cliente")  # Cliente ou Administrador
-
-    # Campos para redefinição de senha
     reset_token = Column(String, nullable=True)
     reset_token_expira = Column(DateTime, nullable=True)
 
-# -------------------------------
-# 2. Pydantic MODELS (API)
-# -------------------------------
 
+# -------------------------------
+# 2️⃣ Pydantic MODELS (API)
+# -------------------------------
 class UserCreate(BaseModel):
     nome_usuario: str
     email: EmailStr

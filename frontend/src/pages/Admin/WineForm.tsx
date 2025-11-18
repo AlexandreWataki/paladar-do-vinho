@@ -6,10 +6,14 @@ import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { motion } from 'framer-motion';
-import { Divider } from 'primereact/divider'; // 💡 NOVO
-import { InputTextarea } from 'primereact/inputtextarea'; // 💡 NOVO
+import { Divider } from 'primereact/divider';
+import { InputTextarea } from 'primereact/inputtextarea';
 import type { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import type { DropdownChangeEvent } from 'primereact/dropdown';
+
+// 💡 NOVAS IMPORTAÇÕES PARA USAR O AXIOS
+import { http } from '../../api/http'; // Ajuste o caminho se necessário
+import { AxiosError } from 'axios';
 
 interface WineData {
   id?: number;
@@ -28,7 +32,7 @@ interface WineData {
   rotulo_url?: string;
 }
 
-// Opções para Dropdowns de Nível (1-5)
+// Opções para Dropdowns de Nível (1-5 )
 const nivelOptions = [
   { label: '1 - Leve', value: 1 },
   { label: '2', value: 2 },
@@ -112,9 +116,9 @@ const WineForm: React.FC = () => {
       const loadWine = async () => {
         setLoading(true);
         try {
-          // Seu endpoint
-          const data = await fetch(`http://127.0.0.1:8000/admin/vinhos/${id}`);
-          const json: WineData = await data.json();
+          // 💡 MUDANÇA CRUCIAL: Usando http.get. O Axios trata o token e o erro HTTP.
+          const response = await http.get(`/admin/vinhos/${id}` );
+          const json: WineData = response.data; // Axios já retorna o JSON em .data
 
           // Ajuste para garantir que os números sejam definidos corretamente
           json.nivel_docura = json.nivel_docura ?? 3;
@@ -125,15 +129,21 @@ const WineForm: React.FC = () => {
 
           setWine(json);
         } catch (error) {
-          console.error('Erro ao carregar vinho:', error);
-          alert('Erro ao carregar dados do vinho.');
+          const axiosError = error as AxiosError;
+          console.error('Erro ao carregar vinho:', axiosError.message);
+          alert('Erro ao carregar dados do vinho. Verifique se o ID existe ou se o token é válido.');
+          
+          // Se for 404 (Not Found), redireciona para a lista
+          if (axiosError.response?.status === 404) {
+             navigate('/admin');
+          }
         } finally {
           setLoading(false);
         }
       };
       loadWine();
     }
-  }, [id, isEditing]);
+  }, [id, isEditing, navigate]); // Adicione 'navigate' às dependências do useEffect
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -152,25 +162,22 @@ const WineForm: React.FC = () => {
     try {
       const method = isEditing ? 'PUT' : 'POST';
       const url = isEditing
-        ? `http://127.0.0.1:8000/admin/vinhos/${id}`
-        : `http://127.0.0.1:8000/admin/vinhos/`;
+        ? `/admin/vinhos/${id}`
+        : `/admin/vinhos/`;
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-        body: JSON.stringify(wine),
-      });
-
-      if (!response.ok) throw new Error('Erro ao salvar o vinho.');
+      // 💡 MUDANÇA: Usando http.request para simplificar PUT/POST e remover token manual
+      await http.request({
+        method: method,
+        url: url,
+        data: wine, // Axios serializa o objeto 'wine' para JSON automaticamente
+      } );
 
       alert(isEditing ? '🍷 Vinho atualizado com sucesso!' : '🍇 Vinho cadastrado com sucesso!');
       navigate('/admin');
     } catch (error) {
-      console.error('Erro:', error);
-      alert('Erro ao salvar vinho.');
+      const axiosError = error as AxiosError;
+      console.error('Erro:', axiosError.message);
+      alert('Erro ao salvar vinho. Verifique o console para mais detalhes.');
     }
   };
 

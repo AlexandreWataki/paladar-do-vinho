@@ -78,6 +78,7 @@ async def get_wine_recommendations(questionnaire: WineQuestionnaire):
 
     # -------------------------------------------------------------
     # FORMATA A RESPOSTA FINAL (lista de WineRecommendation)
+    # 🔧 MODIFICAÇÃO: Adicionado o campo "harmonizacao" do vinho
     # -------------------------------------------------------------
     formatted_recs = []
     for r in recs:
@@ -90,6 +91,7 @@ async def get_wine_recommendations(questionnaire: WineQuestionnaire):
             "preco_medio": r.get("preco_medio", 0.0),
             "rotulo_url": r.get("rotulo_url"),
             "descricao": r.get("descricao", ""),
+            "harmonizacao": r.get("harmonizacao"),  # ✅ ADICIONADO: Campo de harmonização do vinho
             "nivel_docura": r.get("nivel_docura", 0),
             "nivel_tanino": r.get("nivel_tanino", 0),
             "nivel_acidez": r.get("nivel_acidez", 0),

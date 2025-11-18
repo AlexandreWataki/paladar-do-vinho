@@ -3,10 +3,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+// 💡 Importe sua instância do Axios configurada
+import { http } from "../../api/http"; 
+import { AxiosError } from "axios"; // Importe o tipo de erro do Axios para melhor tipagem
 
-const API_LOGIN_URL = "http://127.0.0.1:8000/auth/login";
+// Removida a constante API_LOGIN_URL, pois a baseURL já está no http.ts
 
-const Login: React.FC = () => {
+const Login: React.FC = ( ) => {
   const navigate = useNavigate();
   const { setAuthData } = useAuth();
 
@@ -19,29 +22,16 @@ const Login: React.FC = () => {
     setError("");
 
     try {
-      const resp = await fetch(API_LOGIN_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha }),
-      });
-
-      if (!resp.ok) {
-        const text = await resp.text();
-        console.warn("⚠️ Erro no backend:", text);
-        let msg = "E-mail ou senha incorretos.";
-        try {
-          const data = JSON.parse(text);
-          if (data.detail) msg = data.detail;
-        } catch {}
-        setAuthData(null, null);
-        throw new Error(msg);
-      }
-
-      const data = await resp.json();
+      // 1. Chamada com Axios: mais limpa e já envia o JSON
+      const resp = await http.post("/auth/login", { email, senha } );
+      
+      // 2. Axios retorna o corpo da resposta em .data
+      const data = resp.data; 
       console.log("🎯 Resposta do backend:", data);
 
       if (!data.access_token) throw new Error("Token ausente na resposta.");
 
+      // 3. Salva o token e o cargo no contexto (e no localStorage)
       if (data.role) {
         setAuthData(data.access_token, data.role);
         console.log("💾 Cargo salvo no Contexto:", data.role);
@@ -50,15 +40,37 @@ const Login: React.FC = () => {
         console.warn("⚠️ Nenhum campo 'role' recebido do backend.");
       }
 
+      // 4. Navegação SÓ APÓS o salvamento bem-sucedido
       if (data.role === "Administrador") {
         navigate("/admin");
       } else {
         navigate("/questionary");
       }
-    } catch (err: any) {
-      console.error("Erro de login:", err?.message || err);
-      setError(err?.message || "E-mail ou senha incorretos.");
-      setAuthData(null, null);
+      
+    } catch (err) {
+      // 5. Tratamento de Erro do Axios
+      const axiosError = err as AxiosError;
+      let msg = "E-mail ou senha incorretos.";
+      
+      if (axiosError.response) {
+        // O erro veio do backend (ex: 401 Unauthorized)
+        const backendData = axiosError.response.data as any;
+        if (backendData && backendData.detail) {
+          msg = backendData.detail;
+        } else if (axiosError.message) {
+          msg = axiosError.message;
+        }
+      } else if (axiosError.request) {
+        // O erro foi na requisição (ex: servidor offline)
+        msg = "Erro de conexão. Verifique se o servidor está ativo.";
+      } else {
+        // Outros erros (ex: token ausente na resposta)
+        msg = (err as Error).message || "Ocorreu um erro desconhecido.";
+      }
+
+      console.error("Erro de login:", msg);
+      setError(msg);
+      setAuthData(null, null); // Limpa os dados de autenticação em caso de falha
     }
   };
 

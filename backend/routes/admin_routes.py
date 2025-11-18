@@ -14,9 +14,8 @@ from backend.recommender import WineRecommender
 from backend.security import verificar_admin 
 
 # ---------------------------
-# 1. CRIAÇÃO DO ROUTER (CORREÇÃO DA ORDEM)
+# 1. CRIAÇÃO DO ROUTER
 # ---------------------------
-# ✅ CORREÇÃO: Deve ser a primeira coisa no arquivo para evitar NameError
 router = APIRouter(prefix="/admin/vinhos", tags=["Administração"]) 
 
 # Instância global do recomendador
@@ -33,17 +32,34 @@ async def listar_vinhos_admin(
 ):
     vinhos = db.query(Wine).all()
     if not vinhos:
-        # Nota: Retornar uma lista vazia ([]) é comum, mas o 404 está OK se a lista for nula
         raise HTTPException(status_code=404, detail="Nenhum vinho encontrado.")
         
-    # ✅ CORREÇÃO: Usa WineRead, que mapeia os tipos INT do banco, resolvendo o Erro 500
     return [WineRead.model_validate(v.__dict__) for v in vinhos]
+
+
+# ---------------------------
+# 💡 BUSCAR VINHO POR ID (ROTA FALTANTE)
+# ---------------------------
+@router.get("/{vinho_id}", response_model=WineRead) 
+async def buscar_vinho_admin(
+    vinho_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(verificar_admin)
+):
+    # Busca o vinho no banco de dados
+    vinho = db.query(Wine).filter(Wine.id == vinho_id).first()
+    
+    # Se não encontrar, retorna 404
+    if not vinho:
+        raise HTTPException(status_code=404, detail=f"Vinho com ID {vinho_id} não encontrado.")
+        
+    # Retorna o objeto Wine, validado pelo schema WineRead
+    return WineRead.model_validate(vinho.__dict__)
 
 
 # ---------------------------
 # CRIAR VINHO
 # ---------------------------
-# 🛑 CORREÇÃO: Retorna WineRead (o objeto lido do DB) em vez de WineCreate (schema de input)
 @router.post("/", response_model=WineRead, status_code=status.HTTP_201_CREATED) 
 async def criar_vinho_admin(
     dados_vinho: WineCreate,
@@ -60,14 +76,13 @@ async def criar_vinho_admin(
     global wine_recommender_instance
     wine_recommender_instance = WineRecommender()
 
-    # ✅ Retorna o objeto recém-criado, validado com o schema de leitura
+    # Retorna o objeto recém-criado, validado com o schema de leitura
     return WineRead.model_validate(novo_vinho.__dict__)
 
 
 # ---------------------------
 # ATUALIZAR VINHO
 # ---------------------------
-# 🛑 CORREÇÃO: Retorna WineRead (o objeto lido do DB) em vez de WineCreate (schema de input)
 @router.put("/{vinho_id}", response_model=WineRead) 
 async def atualizar_vinho_admin(
     vinho_id: int,
@@ -88,7 +103,7 @@ async def atualizar_vinho_admin(
     global wine_recommender_instance
     wine_recommender_instance = WineRecommender()
 
-    # ✅ Retorna o objeto atualizado, validado com o schema de leitura
+    # Retorna o objeto atualizado, validado com o schema de leitura
     return WineRead.model_validate(vinho.__dict__)
 
 

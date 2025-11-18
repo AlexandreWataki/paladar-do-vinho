@@ -30,7 +30,6 @@ const AdminPage: React.FC = () => {
       const data = await fetchWines();
       console.log("🍷 Dados recebidos do backend:", data);
 
-      // ✅ Garantir que o retorno seja sempre um array válido
       if (Array.isArray(data)) {
         setWines(data);
       } else if (data && typeof data === "object") {
@@ -77,7 +76,7 @@ const AdminPage: React.FC = () => {
     <div
       style={{
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         gap: '10px',
       }}
@@ -86,22 +85,12 @@ const AdminPage: React.FC = () => {
         label="Editar"
         icon="pi pi-pencil"
         className="p-button-sm p-button-warning"
-        style={{
-          padding: '6px 12px',
-          borderRadius: '6px',
-          fontSize: '0.9rem',
-        }}
         onClick={() => handleEdit(rowData.id)}
       />
       <Button
         label="Excluir"
         icon="pi pi-trash"
         className="p-button-sm p-button-danger"
-        style={{
-          padding: '6px 12px',
-          borderRadius: '6px',
-          fontSize: '0.9rem',
-        }}
         onClick={() => handleDelete(rowData.id)}
       />
     </div>
@@ -112,16 +101,27 @@ const AdminPage: React.FC = () => {
       className="admin-container"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '20px',
+      }}
     >
       <Card
         className="w-full shadow-3 border-round-2xl p-4"
         style={{
-          overflow: 'visible',
-          minHeight: '85vh',
-          position: 'relative',
+          minHeight: "90vh",
+          maxHeight: "90vh",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
           zIndex: 1,
         }}
       >
+
         {/* ===================== TOPO ===================== */}
         <div
           style={{
@@ -138,21 +138,14 @@ const AdminPage: React.FC = () => {
           <Button
             label="Novo"
             icon="pi pi-plus"
+            onClick={handleNew}
             style={{
               backgroundColor: '#ffffff22',
               border: '1px solid #fff',
               color: 'white',
               fontWeight: 'bold',
               borderRadius: '8px',
-              transition: '0.3s',
             }}
-            onMouseOver={(e) =>
-              (e.currentTarget.style.backgroundColor = '#ffffff44')
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.backgroundColor = '#ffffff22')
-            }
-            onClick={handleNew}
           />
 
           <h2
@@ -171,30 +164,30 @@ const AdminPage: React.FC = () => {
           <Button
             label="Sair"
             icon="pi pi-sign-out"
+            onClick={() => {
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('role');
+              window.location.href = '/admin-login';
+            }}
             style={{
               backgroundColor: '#ffffff22',
               border: '1px solid #fff',
               color: 'white',
               fontWeight: 'bold',
               borderRadius: '8px',
-              transition: '0.3s',
-            }}
-            onMouseOver={(e) =>
-              (e.currentTarget.style.backgroundColor = '#ffffff44')
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.backgroundColor = '#ffffff22')
-            }
-            onClick={() => {
-              localStorage.removeItem('access_token');
-              localStorage.removeItem('role');
-              window.location.href = '/admin-login';
             }}
           />
         </div>
 
         {/* ===================== TABELA ===================== */}
-        <div className="p-datatable-wrapper" style={{ flex: 1 }}>
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            paddingBottom: "0.5rem",
+          }}
+        >
           <DataTable
             value={wines}
             paginator
@@ -203,19 +196,14 @@ const AdminPage: React.FC = () => {
             stripedRows
             loading={loading}
             emptyMessage="Nenhum vinho cadastrado ainda."
-            className="p-datatable-sm"
+            className="p-datatable-sm admin-table"
             responsiveLayout="scroll"
           >
             <Column
               field="id"
               header="ID"
               sortable
-              style={{ width: '70px', textAlign: 'center' }}
-              body={(rowData) => (
-                <span style={{ display: 'block', textAlign: 'center' }}>
-                  {rowData.id}
-                </span>
-              )}
+              style={{ width: '60px', textAlign: 'center' }}
             />
             <Column field="titulo" header="Título" sortable />
             <Column field="tipo" header="Tipo" sortable />
@@ -230,23 +218,10 @@ const AdminPage: React.FC = () => {
             <Column
               header="Ações"
               body={actionTemplate}
-              style={{
-                width: '170px',
-                textAlign: 'center',
-                padding: '6px 0',
-              }}
+              style={{ width: '150px', textAlign: 'center' }}
             />
           </DataTable>
         </div>
-
-        {/* ===================== RODAPÉ ===================== */}
-        <div
-          style={{
-            height: '2rem',
-            backgroundColor: '#fff',
-            borderRadius: '0 0 10px 10px',
-          }}
-        />
       </Card>
     </motion.div>
   );

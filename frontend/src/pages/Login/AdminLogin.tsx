@@ -14,6 +14,7 @@ const AdminLogin: React.FC = () => {
     try {
       const response = await loginAdmin(email, senha);
       localStorage.setItem('access_token', response.access_token);
+      localStorage.setItem('role', response.role);
       navigate('/admin'); // ✅ redireciona para o painel admin
     } catch {
       setError('Credenciais inválidas. Verifique e tente novamente.');

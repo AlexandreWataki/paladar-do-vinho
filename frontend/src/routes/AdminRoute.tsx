@@ -14,7 +14,7 @@ const AdminRoute: React.FC = () => {
       <Route path="/novo" element={<WineForm />} />
 
       {/* Edição de vinho */}
-      <Route path="/editar/:id" element={<WineForm />} />
+      <Route path="editar/:id" element={<WineForm />} />
     </Routes>
   );
 };

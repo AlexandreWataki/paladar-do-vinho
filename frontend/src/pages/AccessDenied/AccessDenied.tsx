@@ -17,10 +17,6 @@ const AccessDenied: React.FC = () => {
         color: "#4a148c",
       }}
     >
-      <i
-        className="pi pi-ban"
-        style={{ fontSize: "4rem", color: "#c62828", marginBottom: "20px" }}
-      ></i>
       <h1 style={{ fontSize: "2rem", marginBottom: "10px" }}>🚫 Acesso Negado</h1>
       <p style={{ marginBottom: "24px" }}>
         Esta área é restrita. Seu perfil não possui permissão para acesso.

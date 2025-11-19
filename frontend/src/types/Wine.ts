@@ -1,16 +1,22 @@
 // src/types/Wine.ts
 export interface WineRecommendation {
-  id?: number;
-  nome?: string;             // opcional, alguns lugares usam 'nome'
-  titulo?: string;           // usado no Results.tsx
-  tipo?: string;
-  pais?: string;
-  uva?: string;
-  teor_alcoolico?: string | number;
-  harmonizacao?: string;
-  preco_medio?: number;
-  rotulo_url?: string;
-  descricao?: string;
-  similarity?: number;
-  loja_url?: string;
+  id: number;
+  titulo: string;
+  tipo: string;
+  pais: string;
+  uva: string;
+  preco_medio: number;
+
+  rotulo_url?: string | null;
+  descricao?: string | null;
+
+  nivel_docura?: number;
+  nivel_tanino?: number;
+  nivel_acidez?: number;
+  nivel_frutado?: number;
+  ocasiao?: number;
+
+  harmonizacao?: string | null;
+
+  compatibilidade?: number;
 }

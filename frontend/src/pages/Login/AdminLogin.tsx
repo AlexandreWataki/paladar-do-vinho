@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginAdmin } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';  // <-- IMPORTANTE
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,13 +10,17 @@ const AdminLogin: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const { setAuthData } = useAuth(); // <-- PEGA DO CONTEXTO
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await loginAdmin(email, senha);
-      localStorage.setItem('access_token', response.access_token);
-      localStorage.setItem('role', response.role);
-      navigate('/admin'); // ✅ redireciona para o painel admin
+
+      // 🔥 ESSENCIAL: ATUALIZA O CONTEXTO DE AUTENTICAÇÃO
+      setAuthData(response.access_token, response.role);
+
+      navigate('/admin'); // redireciona após salvar no contexto
     } catch {
       setError('Credenciais inválidas. Verifique e tente novamente.');
     }

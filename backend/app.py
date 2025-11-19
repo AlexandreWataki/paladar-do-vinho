@@ -1,33 +1,30 @@
 # backend/app.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 import uvicorn
 
-# --- MODELS / DATABASE ---
 from backend.models.database import Base, engine
 
-# --- ROUTES ---
+# rotas
 from backend.routes import auth_routes, recommendation_routes
 from backend.routes.admin_routes import router as admin_router
 
-# -------------------------------
-# 1️⃣ CONFIGURAÇÃO INICIAL
-# -------------------------------
-print("🚀 Inicializando FastAPI com suporte CORS ativo...")
 
-# Cria as tabelas no banco (caso não existam)
+print("🚀 Inicializando FastAPI...")
+
 Base.metadata.create_all(bind=engine)
 
-# Instancia o aplicativo FastAPI
 app = FastAPI(
     title="Paladar de Vinho API",
-    debug=True
+    description="API de recomendação de vinhos",
+    version="1.0.0",
 )
 
+
 # -------------------------------
-# 2️⃣ CONFIGURAÇÃO DO CORS
+# CORS
 # -------------------------------
-# ⚠️ Incluímos as variações com localhost e 127.0.0.1 para evitar bloqueios
 origins = [
     "http://localhost",
     "http://localhost:5173",
@@ -37,35 +34,64 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,        # origens permitidas
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# -------------------------------
-# 3️⃣ REGISTRO DAS ROTAS
-# -------------------------------
-app.include_router(auth_routes.router)             # /auth/...
-app.include_router(admin_router)                   # /admin/vinhos/...
-app.include_router(recommendation_routes.router)   # /recommendations/...
 
 # -------------------------------
-# 4️⃣ ENDPOINT RAIZ (teste rápido)
+# OpenAPI personalizado
+# -------------------------------
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+
+    # ADICIONA SUPORTE AUTENTICAÇÃO BEARER NO SWAGGER ⚠️
+    schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+
+    # aplica Bearer como padrão em TODAS rotas protegidas
+    for path in schema["paths"].values():
+        for method in path.values():
+            if "security" not in method:
+                method["security"] = [{"BearerAuth": []}]
+
+    app.openapi_schema = schema
+    return schema
+
+
+app.openapi = custom_openapi
+
+
+# -------------------------------
+# Registro das rotas
+# -------------------------------
+app.include_router(auth_routes.router)
+app.include_router(admin_router)
+app.include_router(recommendation_routes.router)
+
+
+# -------------------------------
+# Teste
 # -------------------------------
 @app.get("/")
 def root():
-    return {
-        "message": "🍷 API do Paladar de Vinho está ativa!",
-        "endpoints": [
-            "/auth/login",
-            "/admin/vinhos",
-            "/recommendations",
-        ],
-    }
+    return {"message": "API ativa!"}
 
-# -------------------------------
-# 5️⃣ EXECUÇÃO LOCAL
-# -------------------------------
+
 if __name__ == "__main__":
     uvicorn.run("backend.app:app", host="127.0.0.1", port=8000, reload=True)

@@ -8,260 +8,219 @@ from backend.models.wine import Wine
 # 1️⃣ PESOS DOS ATRIBUTOS
 # -------------------------------
 WEIGHTS = {
-    'nivel_docura': 3.0,
-    'nivel_tanino': 3.0,
-    'nivel_acidez': 2.0,
-    'nivel_frutado': 2.0,
-    'ocasiao': 1.0
+    "nivel_docura": 3.0,
+    "nivel_tanino": 3.0,
+    "nivel_acidez": 2.0,
+    "nivel_frutado": 2.0,
+    "ocasiao": 1.0,
 }
 WEIGHT_VECTOR = np.array(list(WEIGHTS.values()))
 
 
 class WineRecommender:
-    """Gera recomendações baseadas em preferências do usuário,
-    usando Distância Euclidiana Ponderada + Regras de Negócio de Harmonização e Ocasião.
-    """
+    """Motor de recomendação com Distância Euclidiana + Regras."""
 
     def __init__(self):
-        print("🍷 Carregando dados da tabela 'vinhos' do banco de dados...")
+        print("🍷 Carregando dados da tabela 'vinhos'...")
         self.df = self._load_wines_from_db()
-        print(f"✅ {len(self.df)} vinhos carregados para recomendação.")
+        print(f"✅ {len(self.df)} vinhos carregados.")
         if not self.df.empty:
             print(f"📊 Colunas carregadas: {list(self.df.columns)}")
-            print(self.df.head(2))  # mostra as 2 primeiras linhas
+            print(self.df.head(2))
 
-    # -------------------------------
+    # ------------------------------------------------
     # 2️⃣ CARREGAMENTO DOS VINHOS
-    # -------------------------------
+    # ------------------------------------------------
     def _load_wines_from_db(self) -> pd.DataFrame:
         db = SessionLocal()
         try:
             wines = db.query(Wine).all()
             if not wines:
-                print("⚠️ Nenhum vinho encontrado no banco.")
                 return pd.DataFrame()
 
-            # Cria DataFrame e limpa campos auxiliares
             df = pd.DataFrame([wine.__dict__ for wine in wines])
-            df.drop(columns=['_sa_instance_state'], errors='ignore', inplace=True)
-
-            print(f"📥 Dados brutos carregados ({len(df)} linhas): colunas = {list(df.columns)}")
+            df.drop(columns=["_sa_instance_state"], errors="ignore", inplace=True)
 
             # Converte campos numéricos
-            numeric_cols = list(WEIGHTS.keys())
-            for col in numeric_cols:
-                if col in df.columns:
-                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype(int)
-                else:
-                    print(f"⚠️ Coluna ausente no banco: {col}")
-                    df[col] = 0  # cria coluna se não existir
+            for col in WEIGHTS.keys():
+                df[col] = pd.to_numeric(df.get(col, 0), errors="coerce").fillna(0).astype(int)
 
-            # Cria vetor numérico de atributos
-            df['wine_vector'] = df.apply(
-                lambda w: tuple(w[col] for col in numeric_cols),
-                axis=1
+            # Cria vetor de atributos
+            df["wine_vector"] = df.apply(
+                lambda w: tuple(w[col] for col in WEIGHTS.keys()), axis=1
             )
 
-            # Normaliza strings
-            if 'tipo' in df.columns:
-                df['tipo'] = df['tipo'].fillna('').str.lower().str.strip()
-            if 'harmonizacao' in df.columns:
-                df['harmonizacao'] = df['harmonizacao'].fillna('').str.lower().str.strip()
-            if 'titulo' not in df.columns:
-                print("⚠️ Coluna 'titulo' não encontrada — verifique o modelo Wine.")
+            # Normaliza tipo
+            df["tipo"] = df["tipo"].fillna("").str.lower().str.strip()
+
+            # Harmonização — preservada SEMPRE
+            df["harmonizacao_original"] = df["harmonizacao"].fillna("").astype(str)
+            df["harmonizacao_clean"] = (
+                df["harmonizacao_original"].str.lower().str.strip()
+            )
+
+            # Coluna final que será enviada ao frontend
+            df["harmonizacao"] = df["harmonizacao_original"]
 
             return df
 
         except Exception as e:
             print(f"❌ Erro ao carregar vinhos: {e}")
             return pd.DataFrame()
+
         finally:
             db.close()
 
-    # -------------------------------
+    # ------------------------------------------------
     # 3️⃣ PROCESSA RESPOSTAS DO USUÁRIO
-    # -------------------------------
+    # ------------------------------------------------
     def process_user_answers(self, answers: Dict[str, Any]) -> Dict[str, Any]:
         profile = {
-            'preferencia_vinho': str(answers.get('preferencia_vinho', '')).lower().strip(),
-            'harmonizacao': str(answers.get('harmonizacao', '')).lower().strip(),
-            'nivel_docura': answers.get('nivel_docura', 3),
-            'nivel_tanino': answers.get('nivel_tanino', 3),
-            'nivel_acidez': answers.get('nivel_acidez', 3),
-            'nivel_frutado': answers.get('nivel_frutado', 3),
-            'ocasiao': answers.get('ocasiao', 2)
+            "preferencia_vinho": str(answers.get("preferencia_vinho", "")).lower().strip(),
+            "harmonizacao": str(answers.get("harmonizacao", "")).lower().strip(),
+            "nivel_docura": answers.get("nivel_docura", 3),
+            "nivel_tanino": answers.get("nivel_tanino", 3),
+            "nivel_acidez": answers.get("nivel_acidez", 3),
+            "nivel_frutado": answers.get("nivel_frutado", 3),
+            "ocasiao": answers.get("ocasiao", 2),
         }
-        profile['user_vector'] = tuple(profile[col] for col in WEIGHTS.keys())
+
+        profile["user_vector"] = tuple(profile[col] for col in WEIGHTS.keys())
         return profile
 
-    # -------------------------------
-    # 4️⃣ CÁLCULO DE SIMILARIDADE
-    # -------------------------------
-    def _calculate_similarity(self, user_vector: Tuple, wine_vector: Tuple, wine_type: str) -> float:
+    # ------------------------------------------------
+    # 4️⃣ SIMILARIDADE EUCLIDIANA PONDERADA
+    # ------------------------------------------------
+    def _calculate_similarity(
+        self, user_vector: Tuple, wine_vector: Tuple, wine_type: str
+    ) -> float:
+
         user_vals = np.array(user_vector)
         wine_vals = np.array(wine_vector)
+
         weights = WEIGHT_VECTOR.copy()
 
-        if 'tinto' in wine_type:
-            weights[list(WEIGHTS.keys()).index('nivel_tanino')] = 3.0
-            weights[list(WEIGHTS.keys()).index('nivel_acidez')] = 2.0
-        elif 'branco' in wine_type or 'espumante' in wine_type:
-            weights[list(WEIGHTS.keys()).index('nivel_tanino')] = 0.1
-            weights[list(WEIGHTS.keys()).index('nivel_acidez')] = 3.0
-        elif 'rosé' in wine_type or 'rose' in wine_type:
-            weights[list(WEIGHTS.keys()).index('nivel_tanino')] = 1.0
-            weights[list(WEIGHTS.keys()).index('nivel_acidez')] = 2.5
-        else:
-            weights[list(WEIGHTS.keys()).index('nivel_tanino')] = 2.0
-            weights[list(WEIGHTS.keys()).index('nivel_acidez')] = 2.0
+        if "tinto" in wine_type:
+            weights[list(WEIGHTS.keys()).index("nivel_tanino")] = 3.0
+            weights[list(WEIGHTS.keys()).index("nivel_acidez")] = 2.0
 
-        squared_diff = (user_vals - wine_vals) ** 2
-        weighted_sq = weights * squared_diff
-        distance = np.sqrt(np.sum(weighted_sq))
-        similarity = 1 / (1 + distance)
-        return similarity
+        elif "branco" in wine_type or "espumante" in wine_type:
+            weights[list(WEIGHTS.keys()).index("nivel_tanino")] = 0.1
+            weights[list(WEIGHTS.keys()).index("nivel_acidez")] = 3.0
 
-    # -------------------------------
-    # 5️⃣ REGRAS DE NEGÓCIO
-    # -------------------------------
-    def _apply_business_rules(self, df: pd.DataFrame, user_profile: Dict[str, Any]) -> pd.DataFrame:
-        harm = user_profile.get('harmonizacao', '').lower().strip()
+        elif "rosé" in wine_type or "rose" in wine_type:
+            weights[list(WEIGHTS.keys()).index("nivel_tanino")] = 1.0
+            weights[list(WEIGHTS.keys()).index("nivel_acidez")] = 2.5
 
-        # ⚙️ Nenhuma harmonização ou opção "sem comida"
-        if not harm or 'sem' in harm:
+        distance = np.sqrt(np.sum(weights * ((user_vals - wine_vals) ** 2)))
+        return 1 / (1 + distance)
+
+    # ------------------------------------------------
+    # 5️⃣ REGRAS DE NEGÓCIO DE HARMONIZAÇÃO
+    # ------------------------------------------------
+    def _apply_business_rules(self, df: pd.DataFrame, user_profile: Dict[str, Any]):
+        harm = user_profile["harmonizacao"]
+
+        if not harm or "sem" in harm:
             return df
 
-        # 🍖 Carne Vermelha → força filtro para vinhos tintos
-        if 'carne' in harm and 'vermelha' in harm:
-            df = df[df['tipo'].str.contains('tinto', case=False, na=False)]
-            return df  # ⬅️ força priorização (ignora o tipo escolhido)
+        if "carne" in harm and "vermelha" in harm:
+            return df[df["tipo"].str.contains("tinto")]
 
-        # 🍗 Aves / Frango / Porco → tintos leves ou brancos
-        elif any(x in harm for x in ['ave', 'frango', 'porco']):
-            df = df[df['tipo'].str.contains('tinto|branco', case=False, na=False)]
+        if any(x in harm for x in ["ave", "frango", "porco"]):
+            return df[df["tipo"].str.contains("tinto|branco")]
 
-        # 🐟 Peixes / Frutos do Mar → brancos, rosés e espumantes
-        elif any(x in harm for x in ['peixe', 'fruto', 'mar']):
-            df = df[df['tipo'].str.contains('branco|rosé|rose|espumante', case=False, na=False)]
+        if any(x in harm for x in ["peixe", "fruto", "mar"]):
+            return df[df["tipo"].str.contains("branco|rosé|rose|espumante")]
 
-        # 🍝 Massas e Pizzas → tintos e brancos
-        elif any(x in harm for x in ['massa', 'pizza']):
-            df = df[df['tipo'].str.contains('tinto|branco', case=False, na=False)]
+        if any(x in harm for x in ["massa", "pizza"]):
+            return df[df["tipo"].str.contains("tinto|branco")]
 
-        # 🧀 Queijos / Frios → tintos, brancos e espumantes
-        elif any(x in harm for x in ['queijo', 'frios']):
-            df = df[df['tipo'].str.contains('tinto|branco|espumante', case=False, na=False)]
-
-        # 🥦 Vegetariano → tintos leves, brancos e rosés
-        elif 'vegetariano' in harm:
-            df = df[df['tipo'].str.contains('tinto|branco|rosé|rose', case=False, na=False)]
+        if any(x in harm for x in ["queijo", "frios"]):
+            return df[df["tipo"].str.contains("tinto|branco|espumante")]
 
         return df
 
-
-    # -------------------------------
+    # ------------------------------------------------
     # 6️⃣ RECOMENDAÇÃO FINAL
-    # -------------------------------
-    def get_recommendations_from_profile(self, user_profile: Dict[str, Any], num_recommendations: int = 5) -> List[Dict[str, Any]]:
+    # ------------------------------------------------
+    def get_recommendations_from_profile(
+        self, user_profile: Dict[str, Any], num_recommendations=5
+    ):
+
         if self.df.empty:
-            print("⚠️ DataFrame de vinhos está vazio.")
             return []
 
         df = self.df.copy()
 
-         # 🔹 1. APLICA REGRAS DE NEGÓCIO (HARMONIZAÇÃO) PRIMEIRO
+        # Regras de harmonização
         df = self._apply_business_rules(df, user_profile)
 
-        # 🔹 2. FILTRO PELO TIPO DE VINHO (SOMENTE SE A REGRA NÃO DEFINIR)
-        wine_type = user_profile.get("preferencia_vinho", "").lower().strip()
-        if wine_type and not (
-            'carne vermelha' in user_profile.get('harmonizacao', '').lower()
-        ):
-            before_count = len(df)
-            df = df[df["tipo"].str.contains(wine_type, case=False, na=False)]
-            print(f"🍷 Filtro de tipo aplicado: '{wine_type}' → {len(df)} de {before_count} vinhos restantes.")
+        # Mantém harmonização sempre
+        df["harmonizacao"] = df["harmonizacao_original"]
 
-        # 🔹 3. Garante que as colunas necessárias existem
-        required_cols = ["id", "titulo", "tipo", "harmonizacao"]
-        for col in required_cols:
-            if col not in df.columns:
-                print(f"❌ Coluna ausente no DataFrame: {col}")
-                return []
+        # Filtro de tipo (somente se não for carne vermelha)
+        wine_type = user_profile["preferencia_vinho"]
 
+        if wine_type and "carne vermelha" not in user_profile["harmonizacao"]:
+            df = df[df["tipo"].str.contains(wine_type, case=False)]
+
+        # Calcula similaridade
         user_vector = user_profile["user_vector"]
 
-        print(f"\n🔍 Calculando similaridades para o perfil:")
-        print(f"   Preferência: {user_profile['preferencia_vinho']}")
-        print(f"   Harmonização: {user_profile['harmonizacao']}")
-        print(f"   Ocasião: {user_profile['ocasiao']}")
-        print(f"   Vetor: {user_vector}")
-
-        # 🔹 4. CÁLCULO DE SIMILARIDADE
-        try:
-            df["similarity"] = df.apply(
-                lambda w: self._calculate_similarity(user_vector, w["wine_vector"], w["tipo"]),
-                axis=1
-            )
-        except Exception as e:
-            print(f"❌ Erro ao calcular similaridade: {e}")
-            return []
-
-        # 🔹 5. BÔNUS se harmonização coincidir
         df["similarity"] = df.apply(
-            lambda w: w["similarity"] + (
-                0.1 if user_profile["harmonizacao"] in str(w.get("harmonizacao", "")).lower() else 0
+            lambda w: self._calculate_similarity(
+                user_vector, w["wine_vector"], w["tipo"]
             ),
-            axis=1
+            axis=1,
         )
 
-        # 🔹 6. Ajuste final da escala e conversão em percentual
-        df["similarity"] = df["similarity"].clip(upper=1.0)
+        # Bônus de harmonização exata
+        df["similarity"] += df["harmonizacao_clean"].apply(
+            lambda h: 0.1 if user_profile["harmonizacao"] in h else 0
+        )
+
+        df["similarity"] = df["similarity"].clip(0, 1)
         df["compatibilidade"] = (df["similarity"] * 100).round(1)
 
-        # 🔹 7. Retorna resultados compatíveis com o schema
-        try:
-            top = df.sort_values(by="similarity", ascending=False).head(num_recommendations)
-            print(f"✅ {len(top)} vinhos recomendados após aplicar filtros e pesos de similaridade.")
+        # Seleção final
+        top = df.sort_values(by="similarity", ascending=False).head(num_recommendations)
 
-            # ✅ Garante compatibilidade com o schema Pydantic
-            cols = [
-                "id", "titulo", "tipo", "pais", "uva", "preco_medio",
-                "rotulo_url", "descricao", "harmonizacao", "compatibilidade"
-            ]
-            for c in cols:
-                if c not in top.columns:
-                    top[c] = ""
+        # Garante todas as colunas finais
+        cols = [
+            "id",
+            "titulo",
+            "tipo",
+            "pais",
+            "uva",
+            "preco_medio",
+            "rotulo_url",
+            "descricao",
+            "harmonizacao",
+            "compatibilidade",
+        ]
 
-            return top[cols].to_dict(orient="records")
+        for c in cols:
+            if c not in top.columns:
+                top[c] = None
 
-        except Exception as e:
-            print(f"❌ Erro final ao gerar lista de recomendações: {e}")
-            return []
-        
-    # -------------------------------
-# 7️⃣ PONTO DE ENTRADA PÚBLICO
+        return top[cols].to_dict(orient="records")
+
+
 # -------------------------------
-_RECOMMENDER_INSTANCE = None
+# INSTÂNCIA GLOBAL
+# -------------------------------
+_RECOMMENDER = None
+
 
 def get_recommender():
-    global _RECOMMENDER_INSTANCE
-    if _RECOMMENDER_INSTANCE is None:
-        try:
-            _RECOMMENDER_INSTANCE = WineRecommender()
-            print("✅ WineRecommender inicializado com sucesso.")
-        except Exception as e:
-            print(f"❌ Erro ao inicializar WineRecommender: {e}")
-            _RECOMMENDER_INSTANCE = None
-    return _RECOMMENDER_INSTANCE
+    global _RECOMMENDER
+    if _RECOMMENDER is None:
+        _RECOMMENDER = WineRecommender()
+    return _RECOMMENDER
 
 
-def recommend_wines(user_answers: Dict[str, Any]) -> List[Dict[str, Any]]:
+def recommend_wines(user_answers):
     recommender = get_recommender()
-    if recommender is None:
-        return []
-    try:
-        profile = recommender.process_user_answers(user_answers)
-        return recommender.get_recommendations_from_profile(profile)
-    except Exception as e:
-        print(f"❌ Erro ao executar recomendação: {e}")
-        return []
+    profile = recommender.process_user_answers(user_answers)
+    return recommender.get_recommendations_from_profile(profile)

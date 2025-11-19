@@ -1,3 +1,4 @@
+// src/pages/Admin/WineForm.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from 'primereact/card';
@@ -8,11 +9,10 @@ import { Dropdown } from 'primereact/dropdown';
 import { motion } from 'framer-motion';
 import { Divider } from 'primereact/divider';
 import { InputTextarea } from 'primereact/inputtextarea';
-import type { InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import type { DropdownChangeEvent } from 'primereact/dropdown';
+import { MultiSelect } from 'primereact/multiselect';
 
-// 💡 NOVAS IMPORTAÇÕES PARA USAR O AXIOS
-import { http } from '../../api/http'; // Ajuste o caminho se necessário
+import { http } from '../../api/http';
 import { AxiosError } from 'axios';
 
 interface WineData {
@@ -22,7 +22,7 @@ interface WineData {
   pais: string;
   uva: string;
   preco_medio: number;
-  harmonizacao?: string;
+  harmonizacao?: string[];      // 👈 AGORA É ARRAY DE STRING
   nivel_docura?: number;
   nivel_tanino?: number;
   nivel_acidez?: number;
@@ -32,7 +32,7 @@ interface WineData {
   rotulo_url?: string;
 }
 
-// Opções para Dropdowns de Nível (1-5 )
+// Opções para Dropdowns de Nível (1-5)
 const nivelOptions = [
   { label: '1 - Leve', value: 1 },
   { label: '2', value: 2 },
@@ -52,7 +52,7 @@ const WineForm: React.FC = () => {
     pais: '',
     uva: '',
     preco_medio: 0,
-    harmonizacao: '',
+    harmonizacao: [],        // 👈 começa como array vazio
     nivel_docura: 3,
     nivel_tanino: 3,
     nivel_acidez: 3,
@@ -72,15 +72,14 @@ const WineForm: React.FC = () => {
     { label: 'Espumante', value: 'Espumante' },
   ];
 
-  // Opções de Ocasião (Baseado no seu código)
+  // Opções de Ocasião
   const ocasiaoOptions = [
-    { label: 'Casual', value: 1 },
-    { label: 'Jantar', value: 2 },
-    { label: 'Presente', value: 3 },
-    { label: 'Celebração', value: 4 },
+    { label: 'Dia a Dia / Leve', value: 1 },
+    { label: 'Social / Encontro', value: 2 },
+    { label: 'Especial / Celebração', value: 3 },
   ];
 
-  // Opções de Harmonização (Baseado no seu código)
+  // Opções de Harmonização (categorias)
   const harmonizacaoOptions = [
     { label: 'Carnes Vermelhas', value: 'Carnes Vermelhas' },
     { label: 'Aves e Carnes Brancas', value: 'Aves e Carnes Brancas' },
@@ -104,9 +103,15 @@ const WineForm: React.FC = () => {
     'Sem comida / consumo isolado': ['Tinto', 'Branco', 'Rosé', 'Espumante'],
   };
 
-  // Filtro dinâmico de tipos conforme harmonização
+  // 👉 Aqui estava o erro: harmonizacao agora é array.
+  // Vamos usar só a PRIMEIRA categoria escolhida para filtrar os tipos.
+  const selectedHarmonizacaoKey =
+    Array.isArray(wine.harmonizacao) && wine.harmonizacao.length > 0
+      ? wine.harmonizacao[0]
+      : 'Sem comida / consumo isolado';
+
   const filteredTypes =
-    harmonizacaoMap[wine.harmonizacao || 'Sem comida / consumo isolado']
+    harmonizacaoMap[selectedHarmonizacaoKey]
       ?.map((tipo) => allWineTypes.find((t) => t.value === tipo))
       .filter(Boolean) || allWineTypes;
 
@@ -116,26 +121,46 @@ const WineForm: React.FC = () => {
       const loadWine = async () => {
         setLoading(true);
         try {
-          // 💡 MUDANÇA CRUCIAL: Usando http.get. O Axios trata o token e o erro HTTP.
-          const response = await http.get(`/admin/vinhos/${id}` );
-          const json: WineData = response.data; // Axios já retorna o JSON em .data
+          const response = await http.get(`/admin/vinhos/${id}`);
+          const json = response.data as any;
 
-          // Ajuste para garantir que os números sejam definidos corretamente
-          json.nivel_docura = json.nivel_docura ?? 3;
-          json.nivel_tanino = json.nivel_tanino ?? 3;
-          json.nivel_acidez = json.nivel_acidez ?? 3;
-          json.nivel_frutado = json.nivel_frutado ?? 3;
-          json.ocasiao = json.ocasiao ?? 1;
+          // 🔁 Converte harmonizacao string → array para o MultiSelect
+          let harmonizacaoArray: string[] = [];
+          if (json.harmonizacao) {
+            if (Array.isArray(json.harmonizacao)) {
+              harmonizacaoArray = json.harmonizacao;
+            } else {
+              // se veio "Carnes Vermelhas, Queijos", pode futuramente dar split
+              // por enquanto tratamos como 1 item só
+              harmonizacaoArray = [json.harmonizacao];
+            }
+          }
 
-          setWine(json);
+          const wineData: WineData = {
+            id: json.id,
+            titulo: json.titulo,
+            tipo: json.tipo,
+            pais: json.pais,
+            uva: json.uva,
+            preco_medio: json.preco_medio,
+            harmonizacao: harmonizacaoArray,
+            nivel_docura: json.nivel_docura ?? 3,
+            nivel_tanino: json.nivel_tanino ?? 3,
+            nivel_acidez: json.nivel_acidez ?? 3,
+            nivel_frutado: json.nivel_frutado ?? 3,
+            ocasiao: json.ocasiao ?? 1,
+            descricao: json.descricao ?? '',
+            rotulo_url: json.rotulo_url ?? '',
+          };
+
+          setWine(wineData);
         } catch (error) {
           const axiosError = error as AxiosError;
           console.error('Erro ao carregar vinho:', axiosError.message);
           alert('Erro ao carregar dados do vinho. Verifique se o ID existe ou se o token é válido.');
-          
-          // Se for 404 (Not Found), redireciona para a lista
+
           if (axiosError.response?.status === 404) {
-             navigate('/admin');
+            navigate('/admin');
           }
         } finally {
           setLoading(false);
@@ -143,7 +168,7 @@ const WineForm: React.FC = () => {
       };
       loadWine();
     }
-  }, [id, isEditing, navigate]); // Adicione 'navigate' às dependências do useEffect
+  }, [id, isEditing, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -161,16 +186,24 @@ const WineForm: React.FC = () => {
 
     try {
       const method = isEditing ? 'PUT' : 'POST';
-      const url = isEditing
-        ? `/admin/vinhos/${id}`
-        : `/admin/vinhos/`;
+      const url = isEditing ? `/admin/vinhos/${id}` : `/admin/vinhos/`;
 
-      // 💡 MUDANÇA: Usando http.request para simplificar PUT/POST e remover token manual
+      // 👉 Backend ainda espera UMA string em harmonizacao.
+      // Então aqui juntamos as categorias em texto:
+      const payload = {
+        ...wine,
+        harmonizacao: Array.isArray(wine.harmonizacao)
+          ? wine.harmonizacao.join(', ')
+          : wine.harmonizacao,
+      };
+
       await http.request({
-        method: method,
-        url: url,
-        data: wine, // Axios serializa o objeto 'wine' para JSON automaticamente
-      } );
+        method,
+        url,
+        data: payload,
+      });
+
+      localStorage.removeItem('wine_recommendations');
 
       alert(isEditing ? '🍷 Vinho atualizado com sucesso!' : '🍇 Vinho cadastrado com sucesso!');
       navigate('/admin');
@@ -194,24 +227,30 @@ const WineForm: React.FC = () => {
         style={{ overflow: 'visible' }}
       >
         <form onSubmit={handleSubmit} className="p-fluid formgrid grid">
-          {/* ====================================================== */}
-          {/* 🍷 SEÇÃO 1: INFORMAÇÕES BÁSICAS (2 COLUNAS) */}
-          {/* ====================================================== */}
+          {/* 🍷 SEÇÃO 1: INFORMAÇÕES BÁSICAS */}
           <div className="col-12">
             <h3 className="text-xl mb-3 mt-0 text-primary">Informações Básicas</h3>
             <div className="grid">
               <div className="field col-12 md:col-6">
                 <label htmlFor="titulo">Título</label>
-                <InputText id="titulo" name="titulo" value={wine.titulo} onChange={handleChange} required className="w-full" />
+                <InputText
+                  id="titulo"
+                  name="titulo"
+                  value={wine.titulo}
+                  onChange={handleChange}
+                  required
+                  className="w-full"
+                />
               </div>
 
-              {/* Tipo (com filtro de harmonização) */}
               <div className="field col-12 md:col-6">
                 <label htmlFor="tipo">Tipo</label>
                 <Dropdown
                   id="tipo"
                   value={wine.tipo}
-                  onChange={(e: DropdownChangeEvent) => setWine({ ...wine, tipo: e.value })}
+                  onChange={(e: DropdownChangeEvent) =>
+                    setWine({ ...wine, tipo: e.value })
+                  }
                   options={filteredTypes}
                   placeholder="Selecione o tipo de vinho"
                   appendTo={document.body}
@@ -221,27 +260,44 @@ const WineForm: React.FC = () => {
 
               <div className="field col-12 md:col-6">
                 <label htmlFor="pais">País</label>
-                <InputText id="pais" name="pais" value={wine.pais} onChange={handleChange} required className="w-full" />
+                <InputText
+                  id="pais"
+                  name="pais"
+                  value={wine.pais}
+                  onChange={handleChange}
+                  required
+                  className="w-full"
+                />
               </div>
 
               <div className="field col-12 md:col-6">
                 <label htmlFor="uva">Uva</label>
-                <InputText id="uva" name="uva" value={wine.uva} onChange={handleChange} required className="w-full" />
+                <InputText
+                  id="uva"
+                  name="uva"
+                  value={wine.uva}
+                  onChange={handleChange}
+                  required
+                  className="w-full"
+                />
               </div>
 
-              {/* URL do Rótulo */}
               <div className="field col-12">
                 <label htmlFor="rotulo_url">URL do Rótulo</label>
-                <InputText id="rotulo_url" name="rotulo_url" value={wine.rotulo_url || ''} onChange={handleChange} className="w-full" />
+                <InputText
+                  id="rotulo_url"
+                  name="rotulo_url"
+                  value={wine.rotulo_url || ''}
+                  onChange={handleChange}
+                  className="w-full"
+                />
               </div>
             </div>
           </div>
 
           <Divider />
 
-          {/* ====================================================== */}
-          {/* 💰 SEÇÃO 2: PERFIL DE SABOR E PREÇO (3 COLUNAS) */}
-          {/* ====================================================== */}
+          {/* 💰 SEÇÃO 2: PERFIL DE SABOR E PREÇO */}
           <div className="col-12">
             <h3 className="text-xl mb-3 text-primary">Perfil de Sabor e Características</h3>
             <div className="grid">
@@ -251,7 +307,9 @@ const WineForm: React.FC = () => {
                   id="preco_medio"
                   name="preco_medio"
                   value={wine.preco_medio}
-                  onValueChange={(e) => handleNumberChange('preco_medio', e.value ?? 0)}
+                  onValueChange={(e) =>
+                    handleNumberChange('preco_medio', e.value ?? 0)
+                  }
                   mode="currency"
                   currency="BRL"
                   locale="pt-BR"
@@ -265,7 +323,9 @@ const WineForm: React.FC = () => {
                   id="nivel_docura"
                   value={wine.nivel_docura ?? 3}
                   options={nivelOptions}
-                  onChange={(e: DropdownChangeEvent) => handleNumberChange('nivel_docura', e.value)}
+                  onChange={(e: DropdownChangeEvent) =>
+                    handleNumberChange('nivel_docura', e.value)
+                  }
                   placeholder="Nível de Doçura"
                   appendTo={document.body}
                   className="w-full"
@@ -278,7 +338,9 @@ const WineForm: React.FC = () => {
                   id="nivel_tanino"
                   value={wine.nivel_tanino ?? 3}
                   options={nivelOptions}
-                  onChange={(e: DropdownChangeEvent) => handleNumberChange('nivel_tanino', e.value)}
+                  onChange={(e: DropdownChangeEvent) =>
+                    handleNumberChange('nivel_tanino', e.value)
+                  }
                   placeholder="Nível de Tanino"
                   appendTo={document.body}
                   className="w-full"
@@ -291,7 +353,9 @@ const WineForm: React.FC = () => {
                   id="nivel_acidez"
                   value={wine.nivel_acidez ?? 3}
                   options={nivelOptions}
-                  onChange={(e: DropdownChangeEvent) => handleNumberChange('nivel_acidez', e.value)}
+                  onChange={(e: DropdownChangeEvent) =>
+                    handleNumberChange('nivel_acidez', e.value)
+                  }
                   placeholder="Nível de Acidez"
                   appendTo={document.body}
                   className="w-full"
@@ -304,7 +368,9 @@ const WineForm: React.FC = () => {
                   id="nivel_frutado"
                   value={wine.nivel_frutado ?? 3}
                   options={nivelOptions}
-                  onChange={(e: DropdownChangeEvent) => handleNumberChange('nivel_frutado', e.value)}
+                  onChange={(e: DropdownChangeEvent) =>
+                    handleNumberChange('nivel_frutado', e.value)
+                  }
                   placeholder="Nível de Frutado"
                   appendTo={document.body}
                   className="w-full"
@@ -315,9 +381,7 @@ const WineForm: React.FC = () => {
 
           <Divider />
 
-          {/* ====================================================== */}
           {/* 📋 SEÇÃO 3: CONTEXTO E DETALHES */}
-          {/* ====================================================== */}
           <div className="col-12">
             <h3 className="text-xl mb-3 text-primary">Contexto de Uso e Detalhes</h3>
             <div className="grid">
@@ -327,7 +391,9 @@ const WineForm: React.FC = () => {
                   id="ocasiao"
                   value={wine.ocasiao ?? 1}
                   options={ocasiaoOptions}
-                  onChange={(e: DropdownChangeEvent) => handleNumberChange('ocasiao', e.value)}
+                  onChange={(e: DropdownChangeEvent) =>
+                    handleNumberChange('ocasiao', e.value)
+                  }
                   placeholder="Selecione uma ocasião"
                   appendTo={document.body}
                   className="w-full"
@@ -336,14 +402,18 @@ const WineForm: React.FC = () => {
 
               <div className="field col-12 md:col-6">
                 <label htmlFor="harmonizacao">Harmonização</label>
-                <Dropdown
+                <MultiSelect
                   id="harmonizacao"
-                  value={wine.harmonizacao}
+                  value={wine.harmonizacao || []}
                   options={harmonizacaoOptions}
-                  onChange={(e: DropdownChangeEvent) => {
-                    setWine({ ...wine, harmonizacao: e.value, tipo: '' });
-                  }}
-                  placeholder="Selecione o tipo de harmonização"
+                  onChange={(e) =>
+                    setWine({
+                      ...wine,
+                      harmonizacao: e.value, // array de strings
+                    })
+                  }
+                  placeholder="Selecione o(s) tipo(s) de harmonização"
+                  display="chip"
                   appendTo={document.body}
                   className="w-full"
                 />
@@ -364,7 +434,7 @@ const WineForm: React.FC = () => {
             </div>
           </div>
 
-          {/* BOTÕES DE AÇÃO - Tamanho e Alinhamento Corrigidos */}
+          {/* BOTÕES */}
           <div className="field col-12">
             <div
               className="flex justify-content-end align-items-center"

@@ -18,5 +18,7 @@ export interface WineRecommendation {
 
   harmonizacao?: string | null;
 
+  user_pairing?: string | null;
+
   compatibilidade?: number;
 }

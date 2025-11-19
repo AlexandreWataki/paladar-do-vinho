@@ -21,8 +21,11 @@ class WineRecommender:
     """Motor de recomendação com Distância Euclidiana + Regras."""
 
     def __init__(self):
+        print("🚨 RECOMMENDER ATIVO: VERSÃO COM HARMONIZAÇÃO ✔")
         print("🍷 Carregando dados da tabela 'vinhos'...")
+
         self.df = self._load_wines_from_db()
+
         print(f"✅ {len(self.df)} vinhos carregados.")
         if not self.df.empty:
             print(f"📊 Colunas carregadas: {list(self.df.columns)}")
@@ -45,34 +48,23 @@ class WineRecommender:
             for col in WEIGHTS.keys():
                 df[col] = pd.to_numeric(df.get(col, 0), errors="coerce").fillna(0).astype(int)
 
-            # Cria vetor de atributos
+            # Cria vetor
             df["wine_vector"] = df.apply(
                 lambda w: tuple(w[col] for col in WEIGHTS.keys()), axis=1
             )
 
-            # Normaliza tipo
             df["tipo"] = df["tipo"].fillna("").str.lower().str.strip()
-
-            # Harmonização — preservada SEMPRE
             df["harmonizacao_original"] = df["harmonizacao"].fillna("").astype(str)
-            df["harmonizacao_clean"] = (
-                df["harmonizacao_original"].str.lower().str.strip()
-            )
-
-            # Coluna final que será enviada ao frontend
+            df["harmonizacao_clean"] = df["harmonizacao_original"].str.lower().str.strip()
             df["harmonizacao"] = df["harmonizacao_original"]
 
             return df
-
-        except Exception as e:
-            print(f"❌ Erro ao carregar vinhos: {e}")
-            return pd.DataFrame()
 
         finally:
             db.close()
 
     # ------------------------------------------------
-    # 3️⃣ PROCESSA RESPOSTAS DO USUÁRIO
+    # 3️⃣ PROCESSA PERFIL DO USUÁRIO
     # ------------------------------------------------
     def process_user_answers(self, answers: Dict[str, Any]) -> Dict[str, Any]:
         profile = {
@@ -89,36 +81,31 @@ class WineRecommender:
         return profile
 
     # ------------------------------------------------
-    # 4️⃣ SIMILARIDADE EUCLIDIANA PONDERADA
+    # 4️⃣ SIMILARIDADE
     # ------------------------------------------------
-    def _calculate_similarity(
-        self, user_vector: Tuple, wine_vector: Tuple, wine_type: str
-    ) -> float:
-
+    def _calculate_similarity(self, user_vector, wine_vector, wine_type):
         user_vals = np.array(user_vector)
         wine_vals = np.array(wine_vector)
 
         weights = WEIGHT_VECTOR.copy()
 
         if "tinto" in wine_type:
-            weights[list(WEIGHTS.keys()).index("nivel_tanino")] = 3.0
-            weights[list(WEIGHTS.keys()).index("nivel_acidez")] = 2.0
-
+            weights[1] = 3.0
+            weights[2] = 2.0
         elif "branco" in wine_type or "espumante" in wine_type:
-            weights[list(WEIGHTS.keys()).index("nivel_tanino")] = 0.1
-            weights[list(WEIGHTS.keys()).index("nivel_acidez")] = 3.0
-
+            weights[1] = 0.1
+            weights[2] = 3.0
         elif "rosé" in wine_type or "rose" in wine_type:
-            weights[list(WEIGHTS.keys()).index("nivel_tanino")] = 1.0
-            weights[list(WEIGHTS.keys()).index("nivel_acidez")] = 2.5
+            weights[1] = 1.0
+            weights[2] = 2.5
 
         distance = np.sqrt(np.sum(weights * ((user_vals - wine_vals) ** 2)))
         return 1 / (1 + distance)
 
     # ------------------------------------------------
-    # 5️⃣ REGRAS DE NEGÓCIO DE HARMONIZAÇÃO
+    # 5️⃣ REGRAS DE NEGÓCIO
     # ------------------------------------------------
-    def _apply_business_rules(self, df: pd.DataFrame, user_profile: Dict[str, Any]):
+    def _apply_business_rules(self, df, user_profile):
         harm = user_profile["harmonizacao"]
 
         if not harm or "sem" in harm:
@@ -144,38 +131,31 @@ class WineRecommender:
     # ------------------------------------------------
     # 6️⃣ RECOMENDAÇÃO FINAL
     # ------------------------------------------------
-    def get_recommendations_from_profile(
-        self, user_profile: Dict[str, Any], num_recommendations=5
-    ):
+    def get_recommendations_from_profile(self, user_profile, num_recommendations=5):
 
         if self.df.empty:
             return []
 
         df = self.df.copy()
-
-        # Regras de harmonização
         df = self._apply_business_rules(df, user_profile)
 
-        # Mantém harmonização sempre
         df["harmonizacao"] = df["harmonizacao_original"]
 
-        # Filtro de tipo (somente se não for carne vermelha)
+        # Adiciona a harmonização do usuário na resposta
+        df["user_pairing"] = user_profile["harmonizacao"]
+
         wine_type = user_profile["preferencia_vinho"]
 
         if wine_type and "carne vermelha" not in user_profile["harmonizacao"]:
             df = df[df["tipo"].str.contains(wine_type, case=False)]
 
-        # Calcula similaridade
         user_vector = user_profile["user_vector"]
 
         df["similarity"] = df.apply(
-            lambda w: self._calculate_similarity(
-                user_vector, w["wine_vector"], w["tipo"]
-            ),
+            lambda w: self._calculate_similarity(user_vector, w["wine_vector"], w["tipo"]),
             axis=1,
         )
 
-        # Bônus de harmonização exata
         df["similarity"] += df["harmonizacao_clean"].apply(
             lambda h: 0.1 if user_profile["harmonizacao"] in h else 0
         )
@@ -183,10 +163,8 @@ class WineRecommender:
         df["similarity"] = df["similarity"].clip(0, 1)
         df["compatibilidade"] = (df["similarity"] * 100).round(1)
 
-        # Seleção final
         top = df.sort_values(by="similarity", ascending=False).head(num_recommendations)
 
-        # Garante todas as colunas finais
         cols = [
             "id",
             "titulo",
@@ -197,12 +175,9 @@ class WineRecommender:
             "rotulo_url",
             "descricao",
             "harmonizacao",
+            "user_pairing",
             "compatibilidade",
         ]
-
-        for c in cols:
-            if c not in top.columns:
-                top[c] = None
 
         return top[cols].to_dict(orient="records")
 
@@ -212,15 +187,13 @@ class WineRecommender:
 # -------------------------------
 _RECOMMENDER = None
 
-
 def get_recommender():
     global _RECOMMENDER
     if _RECOMMENDER is None:
         _RECOMMENDER = WineRecommender()
     return _RECOMMENDER
 
-
 def recommend_wines(user_answers):
-    recommender = get_recommender()
-    profile = recommender.process_user_answers(user_answers)
-    return recommender.get_recommendations_from_profile(profile)
+    r = get_recommender()
+    profile = r.process_user_answers(user_answers)
+    return r.get_recommendations_from_profile(profile)

@@ -94,6 +94,9 @@ class WineRecommendation(BaseModel):
     nivel_tanino: int
     nivel_acidez: int
     nivel_frutado: int
+
+    harmonizacao: Optional[str] = Field(None, description="Texto de harmonização do banco de dados")
+    
     score: float = Field(..., description="Similaridade da recomendação")
     user_occasion: Optional[str] = Field(None, description="Descrição textual da ocasião")
     user_pairing: Optional[str] = Field(None, description="Harmonização sugerida")

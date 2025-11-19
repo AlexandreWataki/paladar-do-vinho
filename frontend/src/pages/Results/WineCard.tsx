@@ -26,14 +26,15 @@ const WineCard: React.FC<Props> = ({ wine }) => {
 
       <p><strong>Uva:</strong> {wine.uva}</p>
 
-      <p><strong>Teor Alcoólico:</strong> {wine.teor_alcoolico || "—"}</p>
-
       <p>
         <strong>Harmonização:</strong>{" "}
-        {wine.harmonizacao && wine.harmonizacao.trim() !== "" 
-          ? wine.harmonizacao 
-          : "Não informada"}
+        {wine.user_pairing && wine.user_pairing.trim() !== ""
+          ? wine.user_pairing
+          : (wine.harmonizacao && wine.harmonizacao.trim() !== ""
+              ? wine.harmonizacao
+              : "Não informada")}
       </p>
+
 
       <p><strong>Preço Médio:</strong> {wine.preco_medio}</p>
     </div>

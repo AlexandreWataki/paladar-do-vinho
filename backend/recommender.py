@@ -18,10 +18,10 @@ WEIGHT_VECTOR = np.array(list(WEIGHTS.values()))
 
 
 class WineRecommender:
-    """Motor de recomendação com Distância Euclidiana + Regras."""
+    """Motor de recomendação com Distância Euclidiana + Regras de Negócio Rígidas."""
 
     def __init__(self):
-        print("🚨 RECOMMENDER ATIVO: VERSÃO COM HARMONIZAÇÃO ✔")
+        print("🚨 RECOMMENDER ATIVO: VERSÃO FILTRAGEM RÍGIDA ✔")
         print("🍷 Carregando dados da tabela 'vinhos'...")
 
         self.df = self._load_wines_from_db()
@@ -29,7 +29,7 @@ class WineRecommender:
         print(f"✅ {len(self.df)} vinhos carregados.")
         if not self.df.empty:
             print(f"📊 Colunas carregadas: {list(self.df.columns)}")
-            print(self.df.head(2))
+            # print(self.df.head(2)) # Descomente se quiser ver exemplos no log
 
     # ------------------------------------------------
     # 2️⃣ CARREGAMENTO DOS VINHOS
@@ -44,15 +44,25 @@ class WineRecommender:
             df = pd.DataFrame([wine.__dict__ for wine in wines])
             df.drop(columns=["_sa_instance_state"], errors="ignore", inplace=True)
 
-            # Converte campos numéricos
             for col in WEIGHTS.keys():
-                df[col] = pd.to_numeric(df.get(col, 0), errors="coerce").fillna(0).astype(int)
+                if col in df.columns:
+                    df[col] = (
+                        df[col].apply(                                    
+                            lambda x: int(float(str(x).strip())) if str(x).strip().replace('.', '', 1).isdigit() else 0
+                        )
+                        .fillna(0)
+                        .astype(int)
+                    )
+                else:
+                    # Se a coluna não existir, cria com zeros (fallback)
+                    df[col] = 0
 
-            # Cria vetor
+            # Cria vetor numérico do vinho
             df["wine_vector"] = df.apply(
                 lambda w: tuple(w[col] for col in WEIGHTS.keys()), axis=1
             )
 
+            # Normalização de textos para facilitar buscas
             df["tipo"] = df["tipo"].fillna("").str.lower().str.strip()
             df["harmonizacao_original"] = df["harmonizacao"].fillna("").astype(str)
             df["harmonizacao_clean"] = df["harmonizacao_original"].str.lower().str.strip()
@@ -89,12 +99,13 @@ class WineRecommender:
 
         weights = WEIGHT_VECTOR.copy()
 
+        # Ajusta pesos dinamicamente dependendo do tipo de vinho
         if "tinto" in wine_type:
-            weights[1] = 3.0
+            weights[1] = 3.0 # Tanino importa mais em tintos
             weights[2] = 2.0
         elif "branco" in wine_type or "espumante" in wine_type:
-            weights[1] = 0.1
-            weights[2] = 3.0
+            weights[1] = 0.1 # Tanino importa pouco em brancos
+            weights[2] = 3.0 # Acidez importa muito
         elif "rosé" in wine_type or "rose" in wine_type:
             weights[1] = 1.0
             weights[2] = 2.5
@@ -103,33 +114,7 @@ class WineRecommender:
         return 1 / (1 + distance)
 
     # ------------------------------------------------
-    # 5️⃣ REGRAS DE NEGÓCIO
-    # ------------------------------------------------
-    def _apply_business_rules(self, df, user_profile):
-        harm = user_profile["harmonizacao"]
-
-        if not harm or "sem" in harm:
-            return df
-
-        if "carne" in harm and "vermelha" in harm:
-            return df[df["tipo"].str.contains("tinto")]
-
-        if any(x in harm for x in ["ave", "frango", "porco"]):
-            return df[df["tipo"].str.contains("tinto|branco")]
-
-        if any(x in harm for x in ["peixe", "fruto", "mar"]):
-            return df[df["tipo"].str.contains("branco|rosé|rose|espumante")]
-
-        if any(x in harm for x in ["massa", "pizza"]):
-            return df[df["tipo"].str.contains("tinto|branco")]
-
-        if any(x in harm for x in ["queijo", "frios"]):
-            return df[df["tipo"].str.contains("tinto|branco|espumante")]
-
-        return df
-
-    # ------------------------------------------------
-    # 6️⃣ RECOMENDAÇÃO FINAL
+    # 5️⃣ RECOMENDAÇÃO FINAL (LÓGICA RÍGIDA)
     # ------------------------------------------------
     def get_recommendations_from_profile(self, user_profile, num_recommendations=5):
 
@@ -137,17 +122,55 @@ class WineRecommender:
             return []
 
         df = self.df.copy()
-        df = self._apply_business_rules(df, user_profile)
+        
+        # Logs de Debug
+        print(f"\n--- Nova Recomendação ---")
+        print(f"👤 Usuário pediu: {user_profile['preferencia_vinho']}")
+        print(f"🍽️ Comida: {user_profile['harmonizacao']}")
 
+        # --- 1. DEFINIÇÃO DO TIPO DE VINHO (Lógica de Sobrescrita) ---
+        
+        wine_type_to_filter = user_profile["preferencia_vinho"]
+        aviso_troca = False
+
+        # REGRA DE OURO: Carne Vermelha exige Tinto
+        # Se o prato for carne vermelha, forçamos Tinto, ignorando a preferência anterior.
+        if "carne" in user_profile["harmonizacao"] and "vermelha" in user_profile["harmonizacao"]:
+            if "tinto" not in wine_type_to_filter:
+                print("⚠️ Regra de Carne Vermelha ativada: Forçando alteração para Tinto.")
+                wine_type_to_filter = "tinto"
+                aviso_troca = True
+
+        # --- 2. FILTRAGEM ABSOLUTA (O CORTE) ---
+        
+        # Se a preferência não for "todos", removemos tudo que não for do tipo exato.
+        if wine_type_to_filter and wine_type_to_filter not in ["todos", ""]:
+            filtro = wine_type_to_filter.lower()
+            
+            # Tratamento especial para Rosé (acentos)
+            if "rose" in filtro or "rosé" in filtro:
+                df = df[df["tipo"].str.contains("rosé|rose", case=False, regex=True, na=False)]
+            elif "espumante" in filtro:
+                df = df[df["tipo"].str.contains("espumante", case=False, na=False)]
+            elif "branco" in filtro:
+                df = df[df["tipo"].str.contains("branco", case=False, na=False)]
+            elif "tinto" in filtro:
+                df = df[df["tipo"].str.contains("tinto", case=False, na=False)]
+            else:
+                # Fallback genérico
+                df = df[df["tipo"].str.contains(filtro, case=False, na=False)]
+
+        print(f"✅ Vinhos restantes após filtro de tipo: {len(df)}")
+
+        # SE NÃO SOBROU NADA, RETORNA LISTA VAZIA (Não preenche com outros tipos)
+        if df.empty:
+            print("❌ Nenhum vinho encontrado com esse critério rígido.")
+            return []
+
+        # --- 3. CÁLCULO DE SIMILARIDADE (Apenas nos sobreviventes) ---
+        
         df["harmonizacao"] = df["harmonizacao_original"]
-
-        # Adiciona a harmonização do usuário na resposta
         df["user_pairing"] = user_profile["harmonizacao"]
-
-        wine_type = user_profile["preferencia_vinho"]
-
-        if wine_type and "carne vermelha" not in user_profile["harmonizacao"]:
-            df = df[df["tipo"].str.contains(wine_type, case=False)]
 
         user_vector = user_profile["user_vector"]
 
@@ -155,31 +178,32 @@ class WineRecommender:
             lambda w: self._calculate_similarity(user_vector, w["wine_vector"], w["tipo"]),
             axis=1,
         )
-
+        
+        # Bônus leve se a harmonização bater (apenas melhora o ranking, não filtra)
         df["similarity"] += df["harmonizacao_clean"].apply(
-            lambda h: 0.1 if user_profile["harmonizacao"] in h else 0
+            lambda h: 0.15 if user_profile["harmonizacao"] in h else 0
         )
 
         df["similarity"] = df["similarity"].clip(0, 1)
         df["compatibilidade"] = (df["similarity"] * 100).round(1)
 
+        # Ordena e pega os top N (pode ser menos que 5 se o filtro foi rigoroso)
         top = df.sort_values(by="similarity", ascending=False).head(num_recommendations)
 
+        # Seleciona colunas para retorno
         cols = [
-            "id",
-            "titulo",
-            "tipo",
-            "pais",
-            "uva",
-            "preco_medio",
-            "rotulo_url",
-            "descricao",
-            "harmonizacao",
-            "user_pairing",
-            "compatibilidade",
+            "id", "titulo", "tipo", "pais", "uva", "preco_medio",
+            "rotulo_url", "descricao", "harmonizacao", "user_pairing", "compatibilidade",
         ]
+        
+        records = top[cols].to_dict(orient="records")
+        
+        # Adiciona aviso nos metadados de cada vinho se houve troca forçada
+        if aviso_troca:
+            for record in records:
+                record['aviso_regra'] = "Alteramos sua recomendação para Vinho Tinto para harmonizar perfeitamente com Carne Vermelha."
 
-        return top[cols].to_dict(orient="records")
+        return records
 
 
 # -------------------------------

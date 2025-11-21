@@ -4,7 +4,7 @@ const API_BASE_URL = "http://127.0.0.1:8000";
  * Monta os cabeçalhos HTTP necessários para as requisições,
  * incluindo o Content-Type e o token de autorização, se disponível.
  */
-function getAuthHeaders( ) {
+function getAuthHeaders() {
   const token = localStorage.getItem("access_token");
   return {
     "Content-Type": "application/json",
@@ -67,25 +67,36 @@ export async function createWine(data: any) {
 
 /**
  * Envia os dados do questionário para a API e retorna uma lista de vinhos recomendados.
- * Requer autenticação.
+ * COM LOGS DE DIAGNÓSTICO 🕵️‍♂️
  * @param data - Os dados do questionário preenchido pelo usuário.
  */
 export async function getRecommendations(data: any) {
-  const response = await fetch(`${API_BASE_URL}/recommendations/`, {
-    method: "POST",
-    // ✨ CORREÇÃO APLICADA AQUI: Usa a função que inclui o token de autenticação.
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
+  // 1. O ESPIÃO: Mostra no Console do Navegador (F12) o que está saindo daqui.
+  console.log("🚀 [API] Enviando Payload para Backend:", JSON.stringify(data, null, 2));
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    // Adicionado o status do erro para facilitar a depuração futura.
-    console.error(`Erro ${response.status} ao buscar recomendações:`, errorText);
-    throw new Error(
-      "Erro ao buscar recomendações. Verifique o servidor e tente novamente."
-    );
+  try {
+    const response = await fetch(`${API_BASE_URL}/recommendations/`, {
+      method: "POST",
+      // Usa a função que inclui o token de autenticação.
+      headers: getAuthHeaders(),
+      // Envia os dados EXATAMENTE como vieram, sem mudar nomes
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ [API] Erro ${response.status}:`, errorText);
+      throw new Error(
+        "Erro ao buscar recomendações. Verifique o servidor e tente novamente."
+      );
+    }
+
+    const result = await response.json();
+    console.log("✅ [API] Resposta recebida do Backend:", result);
+    return result;
+
+  } catch (error) {
+    console.error("❌ [API] Falha crítica na requisição:", error);
+    throw error;
   }
-
-  return response.json();
 }

@@ -14,6 +14,9 @@ const Results: React.FC = () => {
   const [recommendations, setRecommendations] = useState<WineRecommendation[]>([]);
   const [sortOption, setSortOption] = useState<"none" | "asc" | "desc">("none");
 
+  // 🔍 Para ampliar imagem
+  const [zoomImage, setZoomImage] = useState<string | null>(null);
+
   // 🔁 Carrega as recomendações salvas no localStorage
   useEffect(() => {
     const storedRecs = localStorage.getItem("wine_recommendations");
@@ -26,7 +29,6 @@ const Results: React.FC = () => {
   const sortedRecommendations = [...recommendations].sort((a, b) => {
     if (sortOption === "asc") return (a.preco_medio ?? 0) - (b.preco_medio ?? 0);
     if (sortOption === "desc") return (b.preco_medio ?? 0) - (a.preco_medio ?? 0);
-
     return 0;
   });
 
@@ -100,12 +102,15 @@ const Results: React.FC = () => {
                 <img
                   src={wine.rotulo_url}
                   alt={`Rótulo de ${wine.titulo}`}
+                  onClick={() => setZoomImage(wine.rotulo_url ?? "")} // ⬅ abre imagem em zoom
                   style={{
                     width: "100%",
-                    height: "320px",
-                    objectFit: "cover",
+                    height: "200px",
+                    objectFit: "contain",
                     borderRadius: "8px",
                     marginBottom: "10px",
+                    cursor: "zoom-in",
+                    backgroundColor: "#fafafa",
                   }}
                 />
               ) : (
@@ -154,7 +159,7 @@ const Results: React.FC = () => {
       <div style={{ textAlign: "center", marginTop: "24px" }}>
         <button
           type="button"
-          onClick={() => navigate('/questionary')} // ✅ redireciona corretamente
+          onClick={() => navigate('/questionary')}
           style={{
             backgroundColor: "#7b1fa2",
             color: "white",
@@ -171,6 +176,37 @@ const Results: React.FC = () => {
           Voltar ao questionário
         </button>
       </div>
+
+      {/* 🔍 Modal de Zoom */}
+      {zoomImage && (
+        <div
+          onClick={() => setZoomImage(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            cursor: "zoom-out",
+          }}
+        >
+          <img
+            src={zoomImage}
+            alt="Zoom"
+            style={{
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              borderRadius: "12px",
+              boxShadow: "0 0 20px rgba(0,0,0,0.5)",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

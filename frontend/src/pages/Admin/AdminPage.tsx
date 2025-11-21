@@ -210,6 +210,20 @@ const AdminPage: React.FC = () => {
             <Column field="pais" header="País" sortable />
             <Column field="uva" header="Uva" sortable />
             <Column
+              header="Rótulo"
+              body={(wine) => (
+                wine.rotulo_url ? (
+                  <img
+                  src={wine.rotulo_url}
+                  alt={wine.titulo}
+                  style={{ width: "60px", borderRadius: "6px" }}
+                />
+              ) : (
+                <span>Sem imagem</span>
+              )
+            )}
+          />
+            <Column
               field="preco_medio"
               header="Preço Médio"
               body={priceTemplate}
@@ -226,5 +240,9 @@ const AdminPage: React.FC = () => {
     </motion.div>
   );
 };
+
+
+
+
 
 export default AdminPage;

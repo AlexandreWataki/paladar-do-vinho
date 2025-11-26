@@ -6,18 +6,30 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # -------------------------------------------------------------
-# Caminho absoluto do banco de dados
+# Caminho do banco de dados
 # -------------------------------------------------------------
-BASE_DIR = r"C:\Users\tarso\paladar-vinho"
-DB_PATH = os.path.join(BASE_DIR, "vinho_database.db")
+# 1. Descobre onde ESTE arquivo (database.py) está
+# Ex: .../paladar-vinho/backend/models
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-if not os.path.exists(BASE_DIR):
-    os.makedirs(BASE_DIR)
+# 2. Sobe dois níveis para chegar à raiz do projeto (paladar-vinho)
+# backend/models -> backend -> paladar-vinho
+ROOT_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 
-if not os.path.exists(DB_PATH):
-    open(DB_PATH, 'a').close()
+# 3. Define o nome do arquivo. 
+DB_NAME = "vinho_database.db" 
 
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+DB_PATH = os.path.join(ROOT_DIR, DB_NAME)
+
+db_path_fixed = DB_PATH.replace("\\", "/")
+
+# URL de conexão para o SQLite
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path_fixed}"
+
+# -------------------------------------------------------------
+# Debug para saberes exatamente onde ele está a ir buscar o banco
+print(f"🚀 [DATABASE] A usar banco de dados em: {DB_PATH}")
+# -------------------------------------------------------------
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,

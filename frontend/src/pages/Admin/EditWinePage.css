@@ -1,0 +1,131 @@
+/* ============================
+   CRUD PAGE – CONTEÚDO INTERNO
+   (usado em Cadastrar e Editar Vinho)
+   ============================ */
+
+.crud-body {
+  flex: 1;
+  padding: 26px 32px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  color: #f5f5f5;
+}
+
+/* botão voltar um pouco menor aqui */
+.crud-back-btn {
+  min-width: 90px;
+}
+
+/* subtítulo explicativo da tela "em construção" do CrudPage */
+.crud-subtitle {
+  max-width: 640px;
+  font-size: 0.98rem;
+  opacity: 0.95;
+}
+
+/* caixinha central do placeholder do CrudPage */
+.crud-placeholder-box {
+  max-width: 620px;
+  width: 100%;
+  padding: 22px 24px;
+  border-radius: 16px;
+
+  background: radial-gradient(
+      circle at top left,
+      rgba(255, 255, 255, 0.14),
+      transparent 55%
+    ),
+    rgba(15, 0, 30, 0.7);
+
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+
+  box-shadow:
+    0 0 18px rgba(0, 0, 0, 0.7),
+    inset 0 0 10px rgba(255, 255, 255, 0.12);
+}
+
+.crud-placeholder-box p {
+  margin: 6px 0;
+}
+
+.crud-placeholder-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 6px 0;
+}
+
+.crud-placeholder-box li {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
+
+/* “pill” de status */
+.crud-pill {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: #260016;
+  font-weight: 600;
+}
+
+.crud-hint {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* ============================
+   FORMULÁRIOS (WineForm)
+   ============================ */
+
+/* faz o formulário do Edit / Novo ficar bonito no centro do card */
+.crud-body form {
+  width: 100%;
+  max-width: 760px;
+  text-align: left;
+  margin: 0 auto;
+}
+
+/* se você tiver .form-group ou semelhante, já fica agradável */
+.crud-body form .form-group,
+.crud-body form .field,
+.crud-body form .p-field {
+  margin-bottom: 14px;
+}
+
+/* labels mais legíveis */
+.crud-body form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* inputs/selects grandes e arredondados (Prime ou HTML normal) */
+.crud-body form input,
+.crud-body form select,
+.crud-body form textarea,
+.crud-body form .p-inputtext,
+.crud-body form .p-dropdown,
+.crud-body form .p-inputnumber-input {
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* RESPONSIVO */
+@media (max-width: 900px) {
+  .crud-body {
+    padding: 20px 16px 22px;
+  }
+
+  .crud-placeholder-box {
+    padding: 18px 16px;
+  }
+}

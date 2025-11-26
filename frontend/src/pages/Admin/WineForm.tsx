@@ -11,9 +11,13 @@ import { Divider } from 'primereact/divider';
 import { InputTextarea } from 'primereact/inputtextarea';
 import type { DropdownChangeEvent } from 'primereact/dropdown';
 import { MultiSelect } from 'primereact/multiselect';
+import { AxiosError } from 'axios';
 
 import { http } from '../../api/http';
-import { AxiosError } from 'axios';
+
+// 🔹 IMPORTA OS ESTILOS GLOBAIS E DO ADMIN
+import '../../styles/base.css';
+import '../../styles/admin.css';
 
 interface WineData {
   id?: number;
@@ -201,61 +205,33 @@ const WineForm: React.FC = () => {
   return (
     <motion.div
       className="admin-container"
-      style={{ overflowY: 'auto', alignItems: 'flex-start' }}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="w-full shadow-3 border-round-2xl p-0" style={{ overflow: 'hidden' }}>
-
-        {/* 🔹 Cabeçalho roxo igual ao Painel Admin */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'linear-gradient(90deg, #6a1b9a, #8e24aa, #ba68c8)',
-            padding: '1.3rem 2.5rem',
-            borderRadius: '12px 12px 0 0',
-            boxShadow: '0 4px 12px rgba(149, 70, 184, 0.25)',
-            color: '#fff',
-          }}
-        >
+      <Card className="admin-card">
+        {/* 🔹 Cabeçalho padrão do painel admin */}
+        <div className="admin-card-header">
           <Button
             label="Voltar"
             icon="pi pi-arrow-left"
             onClick={() => navigate('/admin')}
-            style={{
-              backgroundColor: '#ffffff22',
-              border: '1px solid #fff',
-              color: 'white',
-              fontWeight: 'bold',
-              borderRadius: '8px',
-            }}
+            className="p-button-text admin-header-back-btn"
           />
 
-          <h2
-            style={{
-              color: 'white',
-              margin: 0,
-              textAlign: 'center',
-              fontWeight: 700,
-              flex: 1,
-              textShadow: '0 2px 6px rgba(0,0,0,0.25)',
-            }}
-          >
+          <h2 className="admin-card-title">
             {isEditing ? 'Editar Vinho' : 'Cadastrar Novo Vinho'}
           </h2>
 
-          {/* espaço para alinhar */}
-          <span style={{ width: '90px' }}></span>
+          {/* Espaço para alinhar o título ao centro */}
+          <span className="admin-card-header-spacer" />
         </div>
 
-        {/* Conteúdo do formulário */}
-        <div className="p-4">
-          <form onSubmit={handleSubmit} className="p-fluid formgrid grid">
+        {/* 🔹 Corpo rolável do formulário */}
+        <div className="admin-card-body">
+          <form onSubmit={handleSubmit} className="p-fluid formgrid grid admin-form">
             {/* SECTION 1 */}
             <div className="col-12">
-              <h3 className="text-xl mb-3 mt-0 text-primary">Informações Básicas</h3>
+              <h3 className="admin-section-title">Informações Básicas</h3>
               <div className="grid">
                 <div className="field col-12 md:col-6">
                   <label htmlFor="titulo">Título</label>
@@ -325,7 +301,7 @@ const WineForm: React.FC = () => {
 
             {/* SECTION 2 */}
             <div className="col-12">
-              <h3 className="text-xl mb-3 text-primary">Perfil de Sabor e Características</h3>
+              <h3 className="admin-section-title">Perfil de Sabor e Características</h3>
               <div className="grid">
                 <div className="field col-12 md:col-4">
                   <label htmlFor="preco_medio">Preço Médio (R$)</label>
@@ -409,7 +385,7 @@ const WineForm: React.FC = () => {
 
             {/* SECTION 3 */}
             <div className="col-12">
-              <h3 className="text-xl mb-3 text-primary">Contexto de Uso e Detalhes</h3>
+              <h3 className="admin-section-title">Contexto de Uso e Detalhes</h3>
               <div className="grid">
                 <div className="field col-12 md:col-6">
                   <label htmlFor="ocasiao">Ocasião</label>
@@ -462,39 +438,20 @@ const WineForm: React.FC = () => {
 
             {/* BOTÕES */}
             <div className="field col-12">
-              <div
-                className="flex justify-content-end align-items-center"
-                style={{ gap: '16px', marginTop: '20px', flexWrap: 'wrap' }}
-              >
+              <div className="admin-form-actions">
                 <Button
                   label="Cancelar"
                   icon="pi pi-times"
-                  className="p-button-text p-button-secondary"
+                  className="p-button-text p-button-secondary admin-btn-cancel"
                   type="button"
                   onClick={() => navigate('/admin')}
-                  style={{
-                    borderRadius: '8px',
-                    padding: '10px 18px',
-                    fontWeight: 500,
-                    width: 'auto',
-                    minWidth: '120px',
-                  }}
                 />
                 <Button
                   label={isEditing ? 'Salvar Alterações' : 'Cadastrar Vinho'}
                   icon="pi pi-check"
-                  className="p-button-success"
+                  className="p-button-success admin-btn-submit"
                   type="submit"
                   loading={loading}
-                  style={{
-                    borderRadius: '8px',
-                    padding: '10px 18px',
-                    fontWeight: 500,
-                    backgroundColor: '#7b1fa2',
-                    border: 'none',
-                    width: 'auto',
-                    minWidth: '160px',
-                  }}
                 />
               </div>
             </div>

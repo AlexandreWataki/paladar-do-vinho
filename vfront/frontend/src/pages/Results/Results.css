@@ -1,0 +1,29 @@
+/* ===== Caixas individuais para cada vinho ===== */
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+  margin-top: 12px;
+}
+
+/* cada vinho fica dentro de uma caixa translúcida */
+.wine-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow:
+    0 0 14px rgba(255,255,255,0.12),
+    inset 0 0 10px rgba(255,255,255,0.08);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.wine-box:hover {
+  box-shadow:
+    0 0 20px rgba(255,255,255,0.25),
+    0 0 36px rgba(255,255,255,0.18);
+  transform: translateY(-3px);
+}

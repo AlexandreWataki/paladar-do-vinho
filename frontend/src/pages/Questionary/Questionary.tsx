@@ -3,11 +3,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getRecommendations } from "../../api/wines";
 import "../../styles/base.css";
+import "./Questionary.css";
 
 const Questionary: React.FC = () => {
   const navigate = useNavigate();
 
-  // 🧠 Estados dos campos
   const [preferencia, setPreferencia] = useState("");
   const [ocasiao, setOcasiao] = useState("");
   const [harmonizacao, setHarmonizacao] = useState("");
@@ -19,7 +19,6 @@ const Questionary: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
 
-  // 🍷 Dados auxiliares
   const tiposVinho = ["Tinto", "Branco", "Rosé", "Espumante"];
   const ocasioes = [
     { id: 1, nome: "Dia a Dia / Leve" },
@@ -35,7 +34,6 @@ const Questionary: React.FC = () => {
     "Sem Comida (Apenas Social)",
   ];
 
-  // 🎯 Contextos explicativos
   const contexts: Record<string, any> = {
     sweetness: {
       1: { label: "Seco", desc: "Sem dulçor residual perceptível." },
@@ -72,20 +70,17 @@ const Questionary: React.FC = () => {
     },
   };
 
-  // 🗓️ Contexto da ocasião
   const getOcasionContext = (value: string) => {
     const num = parseInt(value);
     return contexts.occasion[num] || "";
   };
 
-  // 🧠 Ajuste automático: “Carne Vermelha” => “Tinto”
   useEffect(() => {
     if (harmonizacao.toLowerCase().includes("carne vermelha")) {
       setPreferencia("Tinto");
     }
   }, [harmonizacao]);
 
-  // 📤 Envio do formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
@@ -111,188 +106,172 @@ const Questionary: React.FC = () => {
       const recs = await getRecommendations(questionnaireData);
 
       if (!recs || recs.length === 0) {
-        setErro("Nenhum vinho foi encontrado para o seu perfil. Tente ajustar as preferências ou harmonização.");
+        setErro("Nenhum vinho foi encontrado para o seu perfil.");
         return;
       }
 
       localStorage.setItem("wine_recommendations", JSON.stringify(recs));
       navigate("/resultados");
     } catch (error: any) {
-      console.error("Erro ao buscar recomendações:", error);
-      if (error.response?.status === 404) {
-        setErro("Nenhuma recomendação encontrada para o perfil informado. Experimente mudar a harmonização ou tipo de vinho.");
-      } else {
-        setErro("Erro ao buscar recomendações. Tente novamente mais tarde.");
-      }
+      setErro("Erro ao buscar recomendações.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🧾 Renderização
   return (
-    <div className="page-container">
-      <div className="wine-profile-container">
-        <h2>Monte seu perfil de paladar 🍇</h2>
+    <div className="questionary-container">
+      <div className="questionary-card">
+        <div className="questionary-header">
+          <h2 className="questionary-title">
+            <span className="questionary-word">Monte seu perfil de paladar</span>
+          </h2>
 
-        <form onSubmit={handleSubmit}>
-          {/* Tipo de vinho */}
-          <div className="form-group">
-            <label>Qual tipo de vinho você prefere?</label>
+          <button
+            type="button"
+            className="questionary-back"
+            onClick={() => navigate(-1)}
+          >
+            Voltar
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="questionary-form">
+          <div className="q-field">
+            <label className="q-label">Qual tipo de vinho você prefere?</label>
             <select
               value={preferencia}
               onChange={(e) => setPreferencia(e.target.value)}
               required
+              className="q-select"
             >
               <option value="">Selecione</option>
               {tiposVinho.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
           </div>
 
-          {/* Ocasião */}
-          <div className="form-group">
-            <label>Para qual ocasião?</label>
+          <div className="q-field">
+            <label className="q-label">Para qual ocasião?</label>
             <select
               value={ocasiao}
               onChange={(e) => setOcasiao(e.target.value)}
               required
+              className="q-select"
             >
               <option value="">Selecione</option>
               {ocasioes.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.nome}
-                </option>
+                <option key={o.id} value={o.id}>{o.nome}</option>
               ))}
             </select>
-            <div className="context-text">{getOcasionContext(ocasiao)}</div>
+            {ocasiao && <div className="q-hint">{getOcasionContext(ocasiao)}</div>}
           </div>
 
-          {/* Harmonização */}
-          <div className="form-group">
-            <label>Com qual tipo de prato quer harmonizar?</label>
+          <div className="q-field">
+            <label className="q-label">Com qual tipo de prato quer harmonizar?</label>
             <select
               value={harmonizacao}
               onChange={(e) => setHarmonizacao(e.target.value)}
               required
+              className="q-select"
             >
               <option value="">Selecione</option>
               {pratos.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
+                <option key={p} value={p}>{p}</option>
               ))}
             </select>
 
-            {/* 💬 Mensagem contextual dinâmica */}
             {harmonizacao && (
-              <div className="context-text" style={{ marginTop: "8px", color: "#6a1b9a" }}>
+              <div className="q-hint" style={{ marginTop: 6 }}>
                 {harmonizacao.toLowerCase().includes("carne vermelha") && (
-                  <>🍖 Harmonização com carnes vermelhas favorece vinhos <strong>tintos</strong> mais encorpados.</>
+                  <>🍖 Harmoniza bem com vinhos <strong>tintos encorpados</strong>.</>
                 )}
-                {harmonizacao.toLowerCase().includes("frango") && (
-                  <>🍗 Harmonização com aves combina bem com vinhos <strong>brancos</strong> ou <strong>tintos leves</strong>.</>
+                {harmonizacao.toLowerCase().includes("aves") && (
+                  <>🍗 Combina com <strong>brancos</strong> ou <strong>tintos leves</strong>.</>
                 )}
-                {harmonizacao.toLowerCase().includes("peixe") && (
-                  <>🐟 Pratos com peixes pedem vinhos <strong>brancos</strong> ou <strong>rosés</strong>.</>
+                {harmonizacao.toLowerCase().includes("peixes") && (
+                  <>🐟 Ideal com <strong>brancos</strong> ou <strong>rosés</strong>.</>
                 )}
-                {harmonizacao.toLowerCase().includes("queijo") && (
-                  <>🧀 Queijos combinam bem com vinhos <strong>tintos</strong> ou <strong>espumantes</strong>.</>
+                {harmonizacao.toLowerCase().includes("queijos") && (
+                  <>🧀 Vai bem com <strong>tintos</strong> ou <strong>espumantes</strong>.</>
                 )}
               </div>
             )}
           </div>
 
-          {/* Sliders */}
-          <h3>Seu Perfil de Sensações (1 a 5)</h3>
-          <p className="help-text">1 = Menos intenso / 5 = Mais intenso.</p>
+          <div className="q-field">
+            <label className="q-label">Seu Perfil de Sensações (1 a 5)</label>
+            <div className="q-hint">1 = fraco / 5 = intenso</div>
+          </div>
 
-          {/* Doçura */}
-          <div className="form-group slider-group">
-            <label>Nível de Doçura</label>
+          <div className="q-field">
+            <label className="q-label">Nível de Doçura</label>
             <input
               type="range"
               min="1"
               max="5"
               value={docura}
               onChange={(e) => setDocura(Number(e.target.value))}
+              className="q-range"
             />
-            <div className="slider-value">
+            <div className="q-range-value">
               {docura} ({contexts.sweetness[docura].label})
             </div>
-            <div className="context-text">{contexts.sweetness[docura].desc}</div>
           </div>
 
-          {/* Tanino */}
-          <div className="form-group slider-group">
-            <label>Nível de Tanino</label>
+          <div className="q-field">
+            <label className="q-label">Nível de Tanino</label>
             <input
               type="range"
               min="1"
               max="5"
               value={tanino}
               onChange={(e) => setTanino(Number(e.target.value))}
+              className="q-range"
               disabled={!isTinto}
-              style={{
-                opacity: isTinto ? 1 : 0.5,
-                cursor: isTinto ? "pointer" : "not-allowed",
-              }}
+              style={{ opacity: isTinto ? 1 : 0.5 }}
             />
-            <div className="slider-value">
-              {isTinto
-                ? `${tanino} (${contexts.tannin[tanino].label})`
-                : "— não aplicável —"}
-            </div>
-            <div className="context-text">
-              {isTinto
-                ? contexts.tannin[tanino].desc
-                : "Taninos não são relevantes para vinhos brancos, rosés ou espumantes."}
+            <div className="q-range-value">
+              {isTinto ? `${tanino} (${contexts.tannin[tanino].label})` : "—"}
             </div>
           </div>
 
-          {/* Acidez */}
-          <div className="form-group slider-group">
-            <label>Nível de Acidez</label>
+          <div className="q-field">
+            <label className="q-label">Nível de Acidez</label>
             <input
               type="range"
               min="1"
               max="5"
               value={acidez}
               onChange={(e) => setAcidez(Number(e.target.value))}
+              className="q-range"
             />
-            <div className="slider-value">
+            <div className="q-range-value">
               {acidez} ({contexts.acidity[acidez].label})
             </div>
-            <div className="context-text">{contexts.acidity[acidez].desc}</div>
           </div>
 
-          {/* Frutado */}
-          <div className="form-group slider-group">
-            <label>Nível de Frutado</label>
+          <div className="q-field">
+            <label className="q-label">Nível de Frutado</label>
             <input
               type="range"
               min="1"
               max="5"
               value={frutado}
               onChange={(e) => setFrutado(Number(e.target.value))}
+              className="q-range"
             />
-            <div className="slider-value">
+            <div className="q-range-value">
               {frutado} ({contexts.fruitiness[frutado].label})
-            </div>
-            <div className="context-text">
-              {contexts.fruitiness[frutado].desc}
             </div>
           </div>
 
-          {/* Botão */}
-          <button type="submit" className="recommend-btn" disabled={loading}>
+          <button type="submit" className="q-submit" disabled={loading}>
             {loading ? "Carregando..." : "Buscar Recomendações"}
           </button>
 
-          {erro && <p className="error">{erro}</p>}
+          {erro && <p className="q-error">{erro}</p>}
         </form>
       </div>
     </div>

@@ -1,0 +1,251 @@
+/* ============================
+   BARRA: ORDENAR POR + VOLTAR
+   ============================ */
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Ordenar por à esquerda / Voltar à direita */
+  padding: 10px 32px 18px;
+  gap: 16px;
+  flex-wrap: wrap; /* em tela menor, quebra bonitinho */
+}
+
+/* Botão Voltar */
+.results-back {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.results-back:hover {
+  border-color: #ffffff;
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.45),
+    0 0 18px rgba(255, 255, 255, 0.25);
+}
+
+/* ============================
+   CAIXA DE ORDENAÇÃO (ESQUERDA)
+   ============================ */
+.sort-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 1rem;
+  min-width: max-content;
+}
+
+/* SELECT NO MESMO ESTILO DO QUESTIONARY */
+.sort-select {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.15);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  transition: all .25s ease;
+  min-width: 230px;
+
+  /* tira estilo padrão e coloca setinha igual ao Questionary */
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(255,255,255,.8) 50%),
+    linear-gradient(135deg, rgba(255,255,255,.8) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(1em + 2px),
+    calc(100% - 12px) calc(1em + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.sort-select:hover {
+  border-color: #ffffff;
+  background: rgba(255,255,255,0.22);
+  box-shadow:
+    0 0 8px rgba(255,255,255,0.5),
+    0 0 16px rgba(255,255,255,0.35);
+}
+
+/* opções internas da lista (quando abre) */
+.sort-select option {
+  background: #7b2d26;   /* vinho escuro */
+  color: #e7d2ff;        /* texto roxo clarinho */
+}
+
+/* ============================
+   GRID DOS RESULTADOS
+   ============================ */
+/* Layout maior: 4 por linha */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 vinhos por linha no maior */
+  gap: 28px;
+  margin-top: 12px;
+  padding: 0 32px; /* espaçamento lateral */
+}
+
+/* Tela média: 2 por linha */
+@media (max-width: 1100px) {
+  .results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tela bem pequena (celular estreito): 1 por linha */
+@media (max-width: 640px) {
+  .results-grid {
+    grid-template-columns: 1fr;
+    padding: 0 16px;
+  }
+
+  .results-toolbar {
+    justify-content: center;
+  }
+}
+
+/* ============================
+   CARTÕES DOS VINHOS
+   ============================ */
+.wine-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 18px;
+  padding: 18px;
+  text-align: left;
+  line-height: 1.5;
+
+  box-shadow:
+    0 0 14px rgba(255,255,255,0.12),
+    inset 0 0 10px rgba(255,255,255,0.08);
+
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.wine-box:hover {
+  box-shadow:
+    0 0 20px rgba(255,255,255,0.25),
+    0 0 36px rgba(255,255,255,0.18);
+  transform: translateY(-3px);
+}
+
+/* ============================
+   IMAGEM DO VINHO (SEM CAIXA + HOVER VINHO)
+   ============================ */
+.wine-img {
+  width: 100%;
+  height: 230px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  cursor: zoom-in;
+  transition: all 0.25s ease;
+  background-color: transparent;
+}
+
+.wine-img:hover {
+  background-color: rgba(255, 0, 0, 0.18); /* vinho/vermelho translúcido */
+  backdrop-filter: blur(4px);
+  transform: scale(1.03);
+}
+
+.wine-img-empty {
+  width: 100%;
+  height: 180px;
+  background-color: rgba(100, 0, 0, 0.25);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ccc;
+  margin-bottom: 12px;
+}
+
+/* ============================
+   TÍTULO DO VINHO
+   ============================ */
+.wine-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #f1e0ff;
+
+  text-shadow: 
+    0 0 4px rgba(200, 150, 255, 0.5),
+    0 0 9px rgba(160, 90, 255, 0.4);
+}
+
+/* ============================
+   TEXTO DAS INFORMAÇÕES
+   ============================ */
+.wine-info {
+  margin: 4px 0;
+  color: #f5f5f5;
+  opacity: 0.92;
+  font-size: 0.94rem;
+  text-align: justify;
+}
+
+/* ============================
+   PREÇO COM ÍCONE E BRILHO
+   ============================ */
+.wine-price {
+  margin-top: 10px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  text-align: center;
+
+  color: #ffdd7a;
+
+  text-shadow:
+    0 0 5px rgba(255,215,130,0.6),
+    0 0 12px rgba(255,200,100,0.45),
+    0 0 16px rgba(255,190,80,0.35);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.wine-price-icon {
+  font-size: 1.05rem;
+}
+
+/* ============================
+   ZOOM DA IMAGEM (OVERLAY)
+   ============================ */
+.zoom-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  z-index: 9999;
+}
+
+.zoom-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.5);
+}

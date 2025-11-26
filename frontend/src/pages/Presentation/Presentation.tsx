@@ -1,18 +1,31 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/base.css';
+import './Presentation.css';
+import logo from '../../assets/logo.png';
+import frase from '../../assets/frase.png';
+import NeonButton from '../../components/NeonButton';
 
 const Presentation: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="page-container">
-      <h1>🍷 Paladar de Vinho</h1>
-      <p>Descubra vinhos ideais para seu gosto e ocasião.</p>
+    <div className="presentation-container">
+      {/* removi a header-divider */}
 
-      <div style={{ display: 'flex', gap: 16, marginTop: 20 }}>
-        <button onClick={() => navigate('/login')}>Entrar como Usuário</button>
-        <button onClick={() => navigate('/admin-login')}>Administrador</button>
+      <img src={logo} alt="Paladar de Vinho" className="logo-img" />
+      <img
+        src={frase}
+        alt="Descubra vinhos ideais para seu gosto e ocasião"
+        className="phrase-img"
+      />
+
+      <div className="button-group">
+        <NeonButton onClick={() => navigate('/login')}>
+          Entrar como Usuário
+        </NeonButton>
+        <NeonButton onClick={() => navigate('/admin-login')}>
+          Administrador
+        </NeonButton>
       </div>
     </div>
   );

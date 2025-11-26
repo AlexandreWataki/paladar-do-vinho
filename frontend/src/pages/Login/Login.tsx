@@ -1,15 +1,14 @@
-// src/pages/Login.tsx
+// src/pages/Login/Login.tsx
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+
+import "./Login.css";
 import { useAuth } from "../../context/AuthContext";
-// 💡 Importe sua instância do Axios configurada
-import { http } from "../../api/http"; 
-import { AxiosError } from "axios"; // Importe o tipo de erro do Axios para melhor tipagem
+import { http } from "../../api/http";
 
-// Removida a constante API_LOGIN_URL, pois a baseURL já está no http.ts
-
-const Login: React.FC = ( ) => {
+const Login: React.FC = () => {
   const navigate = useNavigate();
   const { setAuthData } = useAuth();
 
@@ -22,138 +21,78 @@ const Login: React.FC = ( ) => {
     setError("");
 
     try {
-      // 1. Chamada com Axios: mais limpa e já envia o JSON
-      const resp = await http.post("/auth/login", { email, senha } );
-      
-      // 2. Axios retorna o corpo da resposta em .data
-      const data = resp.data; 
-      console.log("🎯 Resposta do backend:", data);
+      const resp = await http.post("/auth/login", { email, senha });
+      const data = resp.data;
 
       if (!data.access_token) throw new Error("Token ausente na resposta.");
 
-      // 3. Salva o token e o cargo no contexto (e no localStorage)
-      if (data.role) {
-        setAuthData(data.access_token, data.role);
-        console.log("💾 Cargo salvo no Contexto:", data.role);
-      } else {
-        setAuthData(data.access_token, null);
-        console.warn("⚠️ Nenhum campo 'role' recebido do backend.");
-      }
+      setAuthData(data.access_token, data.role || null);
 
-      // 4. Navegação SÓ APÓS o salvamento bem-sucedido
       if (data.role === "Administrador") {
         navigate("/admin");
       } else {
         navigate("/questionary");
       }
-      
     } catch (err) {
-      // 5. Tratamento de Erro do Axios
       const axiosError = err as AxiosError;
       let msg = "E-mail ou senha incorretos.";
-      
+
       if (axiosError.response) {
-        // O erro veio do backend (ex: 401 Unauthorized)
         const backendData = axiosError.response.data as any;
-        if (backendData && backendData.detail) {
-          msg = backendData.detail;
-        } else if (axiosError.message) {
-          msg = axiosError.message;
-        }
+        if (backendData?.detail) msg = backendData.detail;
       } else if (axiosError.request) {
-        // O erro foi na requisição (ex: servidor offline)
         msg = "Erro de conexão. Verifique se o servidor está ativo.";
-      } else {
-        // Outros erros (ex: token ausente na resposta)
-        msg = (err as Error).message || "Ocorreu um erro desconhecido.";
       }
 
-      console.error("Erro de login:", msg);
       setError(msg);
-      setAuthData(null, null); // Limpa os dados de autenticação em caso de falha
+      setAuthData(null, null);
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "70vh",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          width: 380,
-          background: "#fff",
-          borderRadius: 12,
-          boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-          padding: 24,
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 22,
-            fontWeight: 700,
-            marginBottom: 16,
-            textAlign: "center",
-          }}
-        >
-          Login • Paladar de Vinho 🍷
+    <div className="login-container">
+      <div className="login-card">
+        <h1 className="login-title">
+          <span className="login-word">Login - Usuário</span>
         </h1>
 
         <form onSubmit={handleLogin}>
-          <label style={{ display: "block", marginBottom: 10 }}>
-            <span style={{ display: "block", marginBottom: 6 }}>E-mail</span>
+          <label className="login-field">
+            <span className="login-label">E-mail</span>
             <input
               type="email"
+              className="login-input"
+              placeholder="Digite seu e-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                border: "1px solid #ddd",
-                borderRadius: 8,
-              }}
             />
           </label>
 
-          <label style={{ display: "block", marginBottom: 12 }}>
-            <span style={{ display: "block", marginBottom: 6 }}>Senha</span>
+          <label className="login-field">
+            <span className="login-label">Senha</span>
             <input
               type="password"
+              className="login-input"
+              placeholder="Digite sua senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                border: "1px solid #ddd",
-                borderRadius: 8,
-              }}
             />
           </label>
 
-          {error && (
-            <p style={{ color: "#e74c3c", marginBottom: 12 }}>{error}</p>
-          )}
+          {error && <p className="login-error">{error}</p>}
+
+          <button type="submit" className="login-btn">
+            Entrar
+          </button>
 
           <button
-            type="submit"
-            style={{
-              width: "100%",
-              background: "#7b2d26",
-              color: "#fff",
-              padding: "10px 12px",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
+            type="button"
+            className="login-back"
+            onClick={() => navigate(-1)}
           >
-            Entrar
+            ← Voltar
           </button>
         </form>
       </div>

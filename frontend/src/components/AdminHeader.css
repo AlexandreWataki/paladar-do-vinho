@@ -1,0 +1,64 @@
+.admin-header-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 880px;
+}
+
+/* título + botão juntos */
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-header-title {
+  font-size: 1.8rem;
+  color: #fff;
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.6),
+    0 0 12px rgba(255,255,255,0.3);
+  margin: 0;
+}
+
+/* botão neon */
+.admin-btn {
+  font-size: 0.95rem;
+  padding: 10px 20px;
+  border: 2px solid rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  box-shadow:
+    0 0 8px rgba(255,255,255,0.15),
+    inset 0 0 6px rgba(255,255,255,0.08);
+}
+
+.admin-btn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: #fff;
+  transform: scale(1.05);
+  box-shadow:
+    0 0 14px rgba(255,255,255,0.45),
+    0 0 28px rgba(255,255,255,0.25);
+}
+
+/* responsivo */
+@media (max-width: 600px) {
+  .admin-header-left {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

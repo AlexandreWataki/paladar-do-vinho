@@ -1,0 +1,228 @@
+/* ---------------------------------------------
+   🌈 Questionary - Estilo Neon/Vidro (padrão Login/Admin)
+   --------------------------------------------- */
+
+.questionary-container {
+  min-height: 82vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: transparent;
+}
+
+.questionary-card {
+  width: 520px; /* maior que o login pq tem mais campos */
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 0 10px rgba(255,255,255,0.15),
+    0 0 20px rgba(255,255,255,0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 28px;
+  transition: box-shadow .3s ease;
+}
+
+.questionary-card:hover {
+  box-shadow:
+    0 0 12px rgba(255,255,255,0.3),
+    0 0 30px rgba(255,255,255,0.15);
+}
+
+/* header */
+.questionary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.questionary-title {
+  margin: 0;
+}
+
+.questionary-word {
+  display: inline-block;
+  font-size: 32px;
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    0 0 10px rgba(255,255,255,.7),
+    0 0 18px rgba(255,255,255,.35);
+  animation: qPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes qPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .78; }
+}
+
+/* botão voltar no mesmo estilo da caixa */
+.questionary-back {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.35);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all .25s ease;
+}
+.questionary-back:hover {
+  border-color: #fff;
+  box-shadow:
+    0 0 10px rgba(255,255,255,0.45),
+    0 0 18px rgba(255,255,255,0.25);
+}
+
+/* form */
+.questionary-form {
+  display: grid;
+  gap: 14px;
+}
+
+/* campos */
+.q-field { display: block; }
+.q-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* texto dos campos */
+/* texto dos campos */
+.q-input, .q-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 10px;
+  outline: none;
+  background: rgba(255,255,255,0.15);
+  color: #ffffff;                 /* 💜 roxo clarinho tipo vinho claro */
+  font-size: .95rem;
+  transition: all .25s ease;
+}
+
+.q-input::placeholder {
+  color: #d6bfff;                 /* 💜 tom um pouco mais suave para o placeholder */
+}
+
+/* opções do select (lista aberta) */
+.q-select option {
+  background: #7b2d26;;  /* fundo roxo escuro */
+  color: #e7d2ff;       /* texto roxo clarinho igual ao input */
+}
+
+
+.q-input:focus {
+  border-color: #ffffff;
+  box-shadow:
+    0 0 8px rgba(255,255,255,0.5),
+    0 0 16px rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.22);
+}
+
+.q-select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(255,255,255,.8) 50%),
+    linear-gradient(135deg, rgba(255,255,255,.8) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(1em + 2px),
+    calc(100% - 12px) calc(1em + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* ranges */
+.q-range-wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.q-range {
+  width: 100%;
+  accent-color: #7b2d26; /* vinho */
+}
+
+.q-range-value {
+  min-width: 36px;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+/* hints */
+.q-hint {
+  margin: -4px 0 6px;
+  font-size: .9rem;
+  color: rgba(255,255,255,0.85);
+}
+
+/* erro */
+.q-error {
+  color: #ff7a7a;
+  text-align: center;
+  font-weight: 600;
+  background: rgba(255, 234, 234, 0.12);
+  border: 1px solid rgba(255, 122, 122, .45);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+/* botão submit */
+.q-submit {
+  width: 100%;
+  background: rgba(80, 20, 25, 0.95); /* 🍷 vinho escuro */
+  color: #fff;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow:
+    0 0 12px rgba(80,20,25,0.55),
+    0 0 24px rgba(80,20,25,0.35);
+  transition: all .3s ease;
+}
+.q-submit:hover {
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 16px rgba(255,255,255,0.4),
+    0 0 30px rgba(255,255,255,0.25);
+}
+
+/* loading */
+.questionary-loading {
+  text-align: center;
+  padding: 40px 10px;
+}
+.questionary-emoji {
+  font-size: 64px;
+  margin-bottom: 12px;
+}
+.questionary-loading-title {
+  color: #fff;
+  margin: 0;
+}
+.questionary-loading-sub {
+  color: rgba(255,255,255,0.85);
+  margin-top: 6px;
+}
+
+/* responsivo */
+@media (max-width: 520px) {
+  .questionary-card { width: min(92vw, 520px); padding: 22px; }
+  .questionary-word { font-size: 28px; }
+}

@@ -1,7 +1,12 @@
 // src/App.tsx
 import React from 'react';
-import { BrowserRouter, Routes, Route, Link, Outlet, useNavigate } from 'react-router-dom';
-import { logout } from './api/auth';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Outlet,
+} from 'react-router-dom';
+
 import AdminRoute from './routes/AdminRoute';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -13,84 +18,22 @@ import Login from './pages/Login/Login';
 import AdminLogin from './pages/Login/AdminLogin';
 import AccessDenied from './pages/AccessDenied/AccessDenied';
 
+// Estilos globais
 import './styles/base.css';
+
+// ✅ Header novo (com frase2 + Login / Administrador)
+import Header from './components/Header';
 
 // ----------------------------------------
 // Layout padrão com cabeçalho e navegação
 // ----------------------------------------
 const Layout: React.FC = () => {
-  const navigate = useNavigate();
-  const token = localStorage.getItem('access_token');
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: 16 }}>
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '2px solid #eee',
-          paddingBottom: '10px',
-          marginBottom: '20px',
-        }}
-      >
-        <Link to="/" style={{ textDecoration: 'none', color: '#7b2d26' }}>
-          <h1 style={{ margin: 0, fontFamily: 'Georgia, serif' }}>🍷 Paladar de Vinho</h1>
-        </Link>
+    <div className="app-shell">
+      {/* Header global (frase + botões Login / Administrador) */}
+      <Header />
 
-        <nav style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          {!token && (
-            <>
-              <Link
-                to="/login"
-                style={{
-                  backgroundColor: '#7b2d26',
-                  color: '#fff',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                }}
-              >
-                Login
-              </Link>
-              <Link
-                to="/admin-login"
-                style={{
-                  backgroundColor: '#d4a017',
-                  color: '#fff',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                }}
-              >
-                Administrador
-              </Link>
-            </>
-          )}
-
-          {token && (
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: '#e74c3c',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                cursor: 'pointer',
-              }}
-            >
-              Sair
-            </button>
-          )}
-        </nav>
-      </header>
-
+      {/* Conteúdo das páginas */}
       <main style={{ marginTop: 24 }}>
         <Outlet />
       </main>

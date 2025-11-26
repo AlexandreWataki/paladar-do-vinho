@@ -1,0 +1,99 @@
+/* herda a tipografia e o layout global; usa o mesmo cartão vidro do admin */
+.usuario-page {
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+}
+
+.usuario-table .p-datatable {
+  background: transparent;
+}
+
+/* header da tabela (título + busca) */
+.usuario-table-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 24px; /* mais respiro como no Questionário */
+}
+
+/* ====== Título NEON (branco, sem animação) ====== */
+.usuario-title {
+  font-size: 1.8rem;     /* um pouco maior, como no Questionário */
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 0.6px;
+  padding-top: 4px;
+  padding-bottom: 22px;   /* espaço extra antes da tabela */
+  /* brilho estático branco (sem azul e sem flash) */
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.80),
+    0 0 14px rgba(255,255,255,0.55),
+    0 0 26px rgba(255,255,255,0.35);
+}
+/* (removido ::after e animações) */
+
+/* input de busca com foco suave (branco, sem azul) */
+.usuario-search .p-inputtext {
+  width: 260px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  transition: box-shadow .2s, border-color .2s;
+}
+.usuario-search .p-inputtext:focus {
+  outline: none;
+  border-color: rgba(255,255,255,0.65);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.18),
+    0 0 10px rgba(255,255,255,0.35);
+}
+
+/* célula de título com overflow suave */
+.cell-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+/* “medidor” compacto para intensidades (Doçura/Tanino/Acidez/Frutado) */
+.meter {
+  position: relative;
+  height: 8px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+}
+.meter-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.35));
+}
+.meter-val {
+  font-size: 0.75rem;
+  margin-left: 8px;
+  opacity: 0.8;
+}
+
+/* dialog de detalhes (reaproveita as classes do admin) */
+.usuario-details .details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px 16px;
+}
+.usuario-details .grid-span {
+  grid-column: 1 / -1;
+}
+
+/* ajuste visual de tags PrimeReact no tema vidro */
+.p-tag {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* tabela dentro do cartão vidro já estilizado por .admin-table */

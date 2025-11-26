@@ -1,0 +1,256 @@
+/* ============================
+   CONTAINER GERAL DO ADMIN
+   ============================ */
+
+.admin-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;      
+  justify-content: center;  
+  padding: 22px;
+
+  /* Fundo mais escuro e elegante */
+  background: radial-gradient(circle at top, #1c0029 0%, #090011 55%, #030007 100%);
+}
+
+
+
+/* ============================
+   CARD PRINCIPAL (GLASS)
+   ============================ */
+
+.admin-card {
+  width: 100%;
+  max-width: 1300px;
+  height: calc(100vh - 60px);
+
+  display: flex;
+  flex-direction: column;
+
+  /* FUNDO MAIS ESCURO (pedido do usuário) */
+  background: rgba(10, 0, 18, 0.78);
+
+  border-radius: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    0 0 30px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(140, 50, 170, 0.35);
+
+  overflow: hidden;
+}
+
+/* remove padding padrão do PrimeReact */
+.admin-card .p-card-body,
+.admin-card .p-card-content {
+  padding: 0;
+  background: transparent;
+}
+
+
+
+/* ============================
+   CABEÇALHO DO CARD
+   ============================ */
+
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: linear-gradient(90deg, #5e0f87, #7b1fa2, #9b4dc2);
+  padding: 1.3rem 2.5rem;
+
+  box-shadow:
+    0 4px 16px rgba(149, 70, 184, 0.45),
+    inset 0 0 12px rgba(255, 255, 255, 0.15);
+
+  color: #fff;
+}
+
+.admin-card-title {
+  color: #ffffff;
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.35rem;
+  flex: 1;
+
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.admin-card-header-spacer {
+  width: 120px;
+}
+
+/* botão voltar */
+.admin-header-back-btn {
+  border-radius: 999px !important;
+  border: 1px solid #ffffffcc !important;
+  padding: 0.45rem 1rem !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  transition: 0.2s;
+}
+
+.admin-header-back-btn:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+}
+
+.admin-header-back-btn .pi {
+  font-size: 0.95rem;
+}
+
+
+
+/* ============================
+   CORPO DO CARD
+   ============================ */
+
+.admin-card-body {
+  flex: 1;
+  padding: 1.5rem 1.75rem 1.75rem;
+  overflow-y: auto;
+}
+
+
+
+/* ============================
+   TÍTULOS DAS SEÇÕES
+   ============================ */
+
+.admin-section-title {
+  margin: 0 0 0.8rem;
+  font-size: 1.14rem;
+  font-weight: 600;
+
+  color: #e7c4ff;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.4),
+    0 0 6px rgba(170, 100, 220, 0.35);
+}
+
+
+
+/* ============================
+   FORMULÁRIO
+   ============================ */
+
+.admin-form .field label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  display: inline-block;
+  color: #f7e9ff;
+}
+
+/* inputs */
+.admin-form .p-inputtext,
+.admin-form .p-dropdown,
+.admin-form .p-multiselect,
+.admin-form .p-inputnumber,
+.admin-form .p-inputtextarea {
+  background: rgba(20, 0, 35, 0.9);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  transition: 0.25s;
+}
+
+/* placeholder */
+.admin-form .p-inputtext::placeholder,
+.admin-form .p-inputtextarea::placeholder {
+  color: rgba(240, 220, 255, 0.55);
+}
+
+/* Foco bonito */
+.admin-form .p-inputtext:focus,
+.admin-form .p-dropdown:focus,
+.admin-form .p-multiselect:focus,
+.admin-form .p-inputnumber:focus,
+.admin-form .p-inputtextarea:focus {
+  outline: none;
+  border-color: #d9a8ff !important;
+  box-shadow: 0 0 8px rgba(210, 150, 255, 0.6) !important;
+}
+
+
+
+/* ============================
+   BOTÕES
+   ============================ */
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+/* cancelar */
+.admin-btn-cancel {
+  border-radius: 8px !important;
+  padding: 10px 18px !important;
+  min-width: 120px;
+  font-weight: 500 !important;
+}
+
+/* submit */
+.admin-btn-submit {
+  border-radius: 8px !important;
+  padding: 10px 18px !important;
+  min-width: 160px;
+  font-weight: 600 !important;
+
+  background: linear-gradient(90deg, #7b1fa2, #b24bd1) !important;
+  border: none !important;
+
+  box-shadow:
+    0 0 18px rgba(186, 104, 200, 0.75),
+    0 0 28px rgba(160, 70, 190, 0.55);
+}
+
+.admin-btn-submit:hover {
+  filter: brightness(1.08);
+}
+
+
+
+/* ============================
+   RESPONSIVO
+   ============================ */
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 12px;
+    align-items: flex-start;
+  }
+
+  .admin-card {
+    height: auto;
+    min-height: calc(100vh - 40px);
+  }
+
+  .admin-card-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .admin-card-title {
+    font-size: 1.1rem;
+  }
+
+  .admin-card-header-spacer {
+    width: 90px;
+  }
+
+  .admin-card-body {
+    padding: 1rem 1.25rem 1.25rem;
+  }
+}

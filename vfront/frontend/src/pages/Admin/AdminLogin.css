@@ -1,0 +1,130 @@
+/* ---------------------------------------------
+   🌈 Admin Login - Estilo Neon/Vidro (padrão Login)
+   --------------------------------------------- */
+
+.admin-login-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+}
+
+/* card vidro/neon */
+.admin-login-card {
+  width: 420px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.15),
+    0 0 20px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+.admin-login-card:hover {
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.3),
+    0 0 30px rgba(255, 255, 255, 0.15);
+}
+
+/* título */
+.admin-login-title {
+  margin-bottom: 20px;
+  text-align: center;
+}
+.admin-login-word {
+  display: inline-block;
+  font-size: 30px;
+  color: #fff;
+  text-shadow:
+    0 0 10px rgba(255,255,255,.7),
+    0 0 20px rgba(255,255,255,.4);
+  animation: adminPulse 2.4s infinite ease-in-out;
+}
+@keyframes adminPulse { 0%,100%{opacity:1;} 50%{opacity:.75;} }
+
+/* campos */
+.admin-login-field { display: block; margin-bottom: 14px; }
+.admin-login-label { display: block; margin-bottom: 6px; color: #fff; font-weight: 500; }
+.admin-login-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+}
+.admin-login-input::placeholder { color: rgba(255,255,255,0.6); }
+.admin-login-input:focus {
+  border-color: #ffffff;
+  box-shadow:
+    0 0 8px rgba(255, 255, 255, 0.5),
+    0 0 16px rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* erro */
+.admin-login-error {
+  color: #ff7a7a;
+  margin-bottom: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* botão principal */
+.admin-login-btn {
+  width: 100%;
+  background: rgba(80, 20, 25, 0.95);
+  color: #fff;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow:
+    0 0 12px rgba(80, 20, 25, 0.55),
+    0 0 24px rgba(80, 20, 25, 0.35);
+  transition: all 0.3s ease;
+}
+.admin-login-btn:hover {
+  filter: brightness(1.15);
+  box-shadow:
+    0 0 16px rgba(255, 255, 255, 0.4),
+    0 0 30px rgba(255, 255, 255, 0.25);
+}
+
+/* botão voltar */
+.admin-login-back {
+  margin-top: 10px;
+  width: 100%;
+  background: transparent;
+  color: #ffffff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.35);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+.admin-login-back:hover {
+  background-color: rgba(255,255,255,0.12);
+  box-shadow:
+    0 0 8px rgba(255,255,255,.6),
+    0 0 18px rgba(255,255,255,.4);
+}
+
+/* responsivo */
+@media (max-width: 480px) {
+  .admin-login-card {
+    width: min(360px, 92vw);
+    padding: 24px;
+  }
+}

@@ -1,0 +1,275 @@
+/* ============================
+   CONTAINER
+   ============================ */
+
+.admin-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 22px;
+
+    /* Agora o conteúdo pode crescer verticalmente */
+    align-items: flex-start;
+}
+
+
+/* ============================
+   CARD PRINCIPAL (GLASS)
+   ============================ */
+
+.admin-card {
+    width: 100%;
+    max-width: 1300px;
+
+    /* AQUI: agora cresce junto com o conteúdo */
+    min-height: calc(100vh - 60px);
+    height: auto !important;
+
+    min-height: calc(100vh - 60px);
+
+    display: flex;
+    flex-direction: column;
+
+    background: rgba(20, 0, 30, 0.55);
+    border-radius: 18px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.6),
+        0 0 45px rgba(0, 0, 0, 0.4),
+        inset 0 0 14px rgba(255, 255, 255, 0.08);
+}
+
+/* ============================
+   TOPO DO CARD
+   ============================ */
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 26px;
+    border-radius: 18px 18px 0 0;
+
+    background: linear-gradient(
+        90deg,
+        rgba(122, 30, 64, 0.92),
+        rgba(91, 13, 44, 0.97)
+    );
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.admin-title {
+    flex: 1;
+    text-align: center;
+    color: #ffffff;
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+/* Botões do topo */
+.admin-btn-top {
+    background: transparent !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+    border: 2px solid rgba(255, 255, 255, 0.7) !important;
+    padding: 6px 18px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    transition: all 0.25s ease !important;
+}
+
+.admin-btn-top:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+    box-shadow:
+        0 0 14px rgba(255, 255, 255, 0.7),
+        0 0 28px rgba(255, 255, 255, 0.45);
+    transform: translateY(-2px);
+}
+
+/* ============================
+   ÁREA DA TABELA
+   ============================ */
+
+.admin-table-wrapper {
+    flex: 1;
+    overflow: hidden;
+    padding: 16px 22px 18px;
+}
+
+/* Fundo geral */
+.p-datatable {
+    background: transparent;
+    color: #f5f5f5;
+    font-size: 0.9rem;
+}
+
+/* CABEÇALHO CENTRALIZADO */
+.p-datatable .p-datatable-thead > tr > th {
+    background: rgba(35, 0, 40, 0.90);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    font-weight: 700;
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    padding: 10px 6px;
+}
+
+/* CÉLULAS CENTRALIZADAS */
+.p-datatable .p-datatable-tbody > tr > td {
+    background: rgba(15, 0, 25, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #e8e8e8;
+
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    padding: 10px 6px;
+    overflow-wrap: anywhere;
+}
+
+/* Zebra */
+.p-datatable .p-datatable-tbody > tr:nth-child(even) > td {
+    background: rgba(25, 0, 40, 0.82);
+}
+
+/* Hover */
+.p-datatable .p-datatable-tbody > tr:hover > td {
+    background: rgba(150, 30, 80, 0.28) !important;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: all 0.25s ease;
+}
+
+/* ============================
+   PAGINAÇÃO
+   ============================ */
+
+.p-paginator {
+    background: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: #ffffff;
+    color: #5b0d2c;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+/* ============================
+   AÇÕES (Rótulo / Editar / Excluir)
+   ============================ */
+
+.admin-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Ícones */
+.admin-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+
+    border-radius: 8px !important;
+    border: none !important;
+    font-size: 1rem !important;
+}
+
+/* Rótulo */
+.admin-btn-lightbox {
+    background: #5c6bc0 !important;
+    color: white !important;
+}
+
+/* Editar */
+.admin-btn-edit {
+    background: #fbc02d !important;
+    color: #3a2500 !important;
+}
+
+/* Excluir */
+.admin-btn-delete {
+    background: #e53935 !important;
+    color: #ffffff !important;
+}
+
+/* Sem imagem */
+.no-image {
+    color: #ddd;
+    font-size: 0.85rem;
+}
+
+/* ============================
+   PREÇO (mais bonito e centralizado)
+   ============================ */
+
+.admin-price {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    color: #ffd783;
+
+    text-shadow:
+        0 0 6px rgba(255, 220, 130, 0.7),
+        0 0 12px rgba(255, 200, 100, 0.5);
+}
+
+/* ============================
+   LIGHTBOX DO RÓTULO
+   ============================ */
+
+.admin-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 9999;
+}
+
+.admin-lightbox-img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+}
+
+/* ============================
+   RESPONSIVO
+   ============================ */
+
+@media (max-width: 900px) {
+
+    .admin-card {
+        max-width: 100%;
+        height: calc(100vh - 40px);
+    }
+
+    .admin-table-wrapper {
+        padding: 10px;
+    }
+
+    .admin-actions {
+        gap: 5px;
+    }
+
+    .admin-icon-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.8rem !important;
+    }
+}

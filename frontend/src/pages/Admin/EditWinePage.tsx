@@ -1,37 +1,45 @@
+// src/pages/Admin/EditWinePage.tsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
 import WineForm from "./WineForm";
+import "./AdminPage.css";   // estilos de layout do painel
+import "./CrudPage.css";    // estilos complementares
 
 const EditWinePage: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <div
+    <motion.div
       className="admin-container"
-      style={{
-        overflowY: "auto",
-        alignItems: "flex-start",
-        padding: "20px",
-      }}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
     >
+      <div className="admin-card">
 
-      {/* 🔵 Cabeçalho igual ao Painel Administrativo */}
-      <div
-        style={{
-          background: "linear-gradient(90deg, #6a1b9a, #8e24aa, #ba68c8)",
-          padding: "1.4rem 2rem",
-          borderRadius: "12px",
-          color: "white",
-          textAlign: "center",
-          fontSize: "1.8rem",
-          fontWeight: 700,
-          marginBottom: "2rem",
-          boxShadow: "0 4px 12px rgba(149, 70, 184, 0.25)",
-        }}
-      >
-        Editar Vinho
+        {/* TOPO PADRÃO IGUAL AO CRUD E ADMIN */}
+        <div className="admin-header">
+          <button
+            className="admin-btn-top crud-back-btn"
+            onClick={() => navigate(-1)}
+          >
+            ← Voltar
+          </button>
+
+          <h2 className="admin-title">Editar Vinho</h2>
+
+          {/* espaçador */}
+          <span style={{ width: 90 }} />
+        </div>
+
+        {/* FORMULÁRIO */}
+        <div className="crud-body" style={{ width: "100%", paddingTop: 20 }}>
+          <WineForm />
+        </div>
+
       </div>
-
-      {/* Formulário original */}
-      <WineForm />
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,8 +1,7 @@
-/* -------------------------------
-   🎨 Estilos base - Paladar de Vinho
-   ------------------------------- */
+/* -----------------------------------
+   🌈 Estilos Globais - Paladar de Vinho
+   ----------------------------------- */
 
-/* RESET + tipografia */
 * {
   margin: 0;
   padding: 0;
@@ -10,364 +9,223 @@
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Corpo da aplicação */
+/* Altura total para o fundo degradê */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+}
+
+/* 🌈 Fundo vinho com degradê no site inteiro */
 body {
-  background-color: #fafafa;
-  color: #333;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #7A1E40 0%, #2B0A18 50%, #5A0F2F 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: #ffffff;
   line-height: 1.6;
 }
 
-/* =============================== */
-/*   CONTAINER PADRÃO DAS TELAS    */
-/* =============================== */
+h1, h2, h3, p {
+  color: #ffffff;
+  text-align: center;
+}
 
-.page-container {
+/* -----------------------------------
+   🔝 HEADER ESTILIZADO
+   ----------------------------------- */
+
+.app-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 16px;          /* distância do texto para a linha */
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(4px);
+  position: relative;
+}
+
+/* Linha branca abaixo do header */
+.app-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+/* ESQUERDA: texto Paladar de Vinho */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding-left: 16px;
+}
+
+/* Título Paladar de Vinho */
+.header-title {
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: 4px;
+  letter-spacing: 1px;
+  text-align: left;
+
+  /* ✨ Brilho suave e pulsante no texto */
+  animation: titlePulse 3.5s infinite ease-in-out;
+}
+
+@keyframes titlePulse {
+  0%, 100% {
+    text-shadow:
+      0 0 6px rgba(255, 255, 255, 0.4),
+      0 0 12px rgba(255, 255, 255, 0.25);
+    opacity: 0.38;
+  }
+  50% {
+    text-shadow:
+      0 0 10px rgba(255, 255, 255, 0.8),
+      0 0 18px rgba(255, 255, 255, 0.5);
+    opacity: 0.55;
+  }
+}
+
+/* FUMAÇA ANIMADA */
+.smoke-text {
+  position: relative;
+  display: inline-block;
+  opacity: 0.40;  /* marca d'água leve */
+}
+
+/* Fumaça atrás do texto */
+.smoke-text::after {
+  content: "Paladar de Vinho";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #ffffff;
+
+  opacity: 0.15;
+  filter: blur(14px);
+
+  /* 🌫️ Fumaça grande + movimento + pulsação */
+  animation: smokeFloat 6s infinite ease-in-out;
+}
+
+@keyframes smokeFloat {
+  0% {
+    transform: translateX(0) translateY(0) scale(1);
+    opacity: 0.15;
+    filter: blur(12px);
+  }
+  25% {
+    transform: translateX(4px) translateY(-3px) scale(1.02);
+    opacity: 0.10;
+    filter: blur(16px);
+  }
+  50% {
+    transform: translateX(-3px) translateY(2px) scale(1.03);
+    opacity: 0.13;
+    filter: blur(18px);
+  }
+  75% {
+    transform: translateX(3px) translateY(-2px) scale(1.01);
+    opacity: 0.11;
+    filter: blur(14px);
+  }
+  100% {
+    transform: translateX(0) translateY(0) scale(1);
+    opacity: 0.15;
+    filter: blur(12px);
+  }
+}
+
+/* (se ainda usar logo em alguma outra parte, pode manter) */
+.header-logo {
+  height: 48px;
+  width: auto;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+}
+
+/* DIREITA: navegação */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 24px;
+}
+
+/* Botões no header (container) */
+.header-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-  padding: 24px;
-}
-
-/* =============================== */
-/*          TEXTOS BÁSICOS         */
-/* =============================== */
-
-h1, h2, h3 {
-  color: #4a148c;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-p {
-  max-width: 480px;
-  text-align: center;
-  color: #555;
-  margin-bottom: 16px;
-}
-
-/* =============================== */
-/*      FORMULÁRIOS                */
-/* =============================== */
-
-.small-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 360px;
-}
-
-form {
-  width: 100%;
-}
-
-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
-}
-
-input, select {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-input:focus, select:focus {
-  border-color: #7b1fa2;
-  outline: none;
-}
-
-/* =============================== */
-/*             BOTÕES              */
-/* =============================== */
-
-button {
-  padding: 10px 16px;
-  background-color: #7b1fa2;
-  color: white;
+  min-width: 110px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 8px;
   border: none;
-  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s, transform 0.2s;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-button:hover {
-  background-color: #6a1b9a;
-  transform: scale(1.05);
+/* Botão Login */
+.header-btn-login {
+  background-color: #5b1430;
+  color: #ffffff;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* Botão Administrador */
+.header-btn-admin {
+  background-color: #f2a623;
+  color: #1c1400;
 }
 
-/* =============================== */
-/*   ÁREA ADMINISTRATIVA (CARD)    */
-/* =============================== */
-
-.admin-container {
-  max-width: 1400px;   /* 🔥 ajuste da largura do card */
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 24px 0;
+.header-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
 }
 
-.p-dropdown-panel {
-  z-index: 9999 !important;
-}
+/* -----------------------------------
+   ⚡ Botões NEON (globais)
+   ----------------------------------- */
 
-/* =============================== */
-/*          ESTILO DA TABELA       */
-/* =============================== */
-
-.p-datatable {
-  width: 100%;
-  border-collapse: collapse !important;
-}
-
-/* Cabeçalho */
-.p-datatable thead th {
-  background-color: #f4f4f4 !important;
-  color: #4a2c2a !important;
-  font-weight: 600 !important;
-  text-align: left;
-  border-bottom: 2px solid #e0e0e0 !important;
-}
-
-/* Linhas */
-.p-datatable tbody tr {
-  background-color: #fff !important;
-  border-radius: 8px;
-  transition: all 0.2s ease-in-out;
-  height: 2rem !important;
-  vertical-align: middle !important;
-}
-
-.p-datatable tbody tr:hover {
-  background-color: #faf0e6 !important;
-  box-shadow: inset 0 0 0 2px #e3d3f4;
-}
-
-/* Botões da tabela */
-.p-datatable .p-button {
-  border-radius: 6px !important;
-  font-size: 0.78rem !important;
-  padding: 0.30rem 0.50rem !important;
-}
-
-/* Wrapper da tabela */
-.p-datatable-wrapper {
-  width: 100%;
-  overflow-y: auto;       /* 🔥 scroll apenas no corpo da tabela */
-  overflow-x: hidden;
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: #c6a1cc #f5f2f7;
-}
-
-.p-datatable-wrapper::-webkit-scrollbar {
-  width: 8px;
-}
-
-.p-datatable-wrapper::-webkit-scrollbar-thumb {
-  background-color: #c6a1cc;
-  border-radius: 8px;
-}
-
-/* Header fixo */
-.p-datatable thead {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background-color: #f4f4f4 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* Cores dos botões do Admin */
-.p-button-warning {
-  background-color: #d4a017 !important;
-  border: none !important;
-  color: #fff !important;
-}
-
-.p-button-warning:hover {
-  background-color: #b8860b !important;
-}
-
-.p-button-danger {
-  background-color: #7b2d26 !important;
-  border: none !important;
-  color: #fff !important;
-}
-
-.p-button-danger:hover {
-  background-color: #9b1c1c !important;
-}
-
-/* Paginação */
-.p-paginator {
-  font-size: 0.82rem !important;
-  padding: 0.25rem 0 !important;
-}
-
-/* =============================== */
-/*   TABELA DO ADMIN – REFINADA    */
-/* =============================== */
-
-.admin-table .p-datatable-thead > tr > th,
-.admin-table .p-datatable-tbody > tr > td {
-  font-size: 0.88rem !important;
-  padding: 0.35rem 0.5rem !important;
-}
-
-.admin-table .p-datatable-tbody > tr {
-  height: 2rem !important;
-}
-
-.admin-table .p-button {
-  font-size: 0.78rem !important;
-  padding: 0.30rem 0.45rem !important;
-}
-
-.admin-table .p-paginator {
-  font-size: 0.82rem !important;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-
-/* =============================== */
-/*   QUESTIONÁRIO – WINEPROFILE    */
-/* =============================== */
-
-.wine-profile-container {
-  max-width: 600px;
-  margin: auto;
-  background-color: #fff;
-  padding: 30px;
+.btn-neon,
+.neon-btn {
+  border: 2px solid #ffffff;
+  background: transparent;
+  color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.wine-profile-container h2 {
-  text-align: center;
-  color: #5e35b1;
-  margin-bottom: 25px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #333;
-}
-
-input[type="range"],
-select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #fff;
-}
-
-.slider-group {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-  margin-bottom: 20px;
-}
-
-.slider-value {
-  text-align: center;
-  font-size: 1.1em;
-  font-weight: bold;
-  margin-top: 6px;
-  color: #5e35b1;
-}
-
-.context-text {
-  font-size: 0.9em;
-  color: #666;
-  margin-top: 5px;
-  min-height: 20px;
-}
-
-.help-text {
-  font-style: italic;
-  color: #888;
-  margin-top: 5px;
-  font-size: 0.85em;
-}
-
-button.recommend-btn {
-  width: 100%;
-  padding: 12px;
-  background-color: #5e35b1;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.1em;
   cursor: pointer;
+  padding: 10px 20px;
   font-weight: 600;
-  transition: background-color 0.2s;
+  letter-spacing: 0.4px;
+  transition: all 0.25s ease;
 }
 
-button.recommend-btn:hover {
-  background-color: #4527a0;
+.btn-neon:hover,
+.neon-btn:hover {
+  transform: translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 0 8px rgba(255, 255, 255, 0.6),
+    0 0 18px rgba(255, 255, 255, 0.4);
 }
 
-/* 🔧 Ajuste fino: botões da paginação ~5% menores (sem esmagar) */
-.admin-table .p-paginator .p-paginator-element {
-  padding: 0.32rem 0.65rem !important;  /* confortável e compacto */
-  font-size: 0.80rem !important;        /* -5% de redução */
-  min-width: 34px !important;           /* evita ficar espremido */
-  border-radius: 8px !important;
+.neon-text {
+  animation: pulseWhite 2.4s infinite ease-in-out;
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.7),
+    0 0 20px rgba(255, 255, 255, 0.4);
 }
 
-.admin-table .p-paginator .p-paginator-page {
-  padding: 0.32rem 0.70rem !important;
-  font-size: 0.82rem !important;
-}
-
-.admin-table .p-paginator .p-paginator-icon {
-  font-size: 0.78rem !important;        /* setas menorzinhas */
-}
-
-/* -----------------------------
-   MULTISELECT - CHIPS ELEGANTES
-   ----------------------------- */
-
-.p-multiselect-token {
-  background-color: #f2f2f2 !important;
-  color: #444 !important;
-  border-radius: 14px !important;
-  padding: 4px 10px !important;
-  font-size: 0.85rem !important;
-  font-weight: 500 !important;
-  border: 1px solid #d0d0d0 !important;
-}
-
-.p-multiselect-token-icon {
-  font-size: 12px !important;
-  margin-left: 6px !important;
-  color: #666 !important;
-  opacity: 0.6;
-}
-
-.p-multiselect-token-icon:hover {
-  opacity: 1;
-  color: #333 !important;
+@keyframes pulseWhite {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
 }
